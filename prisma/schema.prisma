@@ -9,3 +9,140 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id            Int               @default(autoincrement()) @id
+  email         String            @unique
+  password      String
+  username      String
+  role          Role              @default(CLIENT)
+  createAt      DateTime          @default(now()) @map("created_at")
+  updateAt      DateTime          @updatedAt @map("updated_at")
+
+  //relations
+  car           Car?     
+  orders        Order[]         
+  likesProducts UserLikeProduct[] 
+
+  @@map("user")
+}
+
+model Product {
+  id            Int               @default(autoincrement()) @id
+  name          String
+  description   String
+  stock         Int
+  price         Decimal
+  isEnable      Boolean           @default(false)
+  createAt      DateTime          @default(now()) @map("created_at")
+  updateAt      DateTime          @updatedAt      @map("updated_at")
+
+  //relations
+  catalog       Catalog           @relation(fields: [catalogId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  catalogId     Int
+  likesUsers    UserLikeProduct[] 
+  images        Image[]
+  orderDetails  OrderDetail[]
+
+  @@map("product")
+}
+
+model Image {
+  id            Int         @default(autoincrement()) @id
+  name          String
+  url           String
+  createAt      DateTime    @default(now()) @map("created_at")
+  updateAt      DateTime    @updatedAt      @map("updated_at")
+
+  //relations
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productId     Int
+
+  @@map("image")
+}
+
+model Catalog {
+  id            Int         @default(autoincrement()) @id
+  name          String
+  description   String
+  createAt      DateTime    @default(now()) @map("created_at")
+  updateAt      DateTime    @updatedAt @map("updated_at")
+
+  //relations
+  Products      Product[]
+
+  @@map("catalog")
+}
+
+model UserLikeProduct {
+  id            Int         @default(autoincrement()) @id
+  createAt      DateTime    @default(now()) @map("created_at")
+
+  //relations
+  product       Product?    @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productId     Int?        @map("product_id")
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId        Int?        @map("user_id")
+
+
+  @@map("user_like_post")
+}
+
+model Car {
+  id            Int             @default(autoincrement()) @id
+  total         Decimal
+  createAt      DateTime        @default(now()) @map("created_at")
+  updateAt      DateTime        @updatedAt      @map("updated_at")
+
+  //relations
+  user          User            @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId        Int             @map("user_id") @unique
+  products      ProductInCar[]
+
+  @@map("car")
+}
+model ProductInCar {
+  id            Int         @default(autoincrement()) @id
+  quantity      Int
+  createAt      DateTime    @default(now()) @map("created_at")
+  updateAt      DateTime    @updatedAt      @map("updated_at")
+
+  //relations
+  car           Car         @relation(fields: [carId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  carId         Int
+
+  @@map("product_in_car")
+}
+
+model Order {
+  id            Int         @default(autoincrement()) @id
+  total         Decimal
+  createAt      DateTime    @default(now()) @map("created_at")
+  updateAt      DateTime    @updatedAt      @map("updated_at")
+
+  //relations
+  user          User        @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId        Int
+  orderDetails  OrderDetail[]
+}
+
+model OrderDetail {
+  id            Int         @default(autoincrement()) @id
+  quantity      Int
+  subtotal      Decimal
+  createAt      DateTime    @default(now()) @map("created_at")
+  updateAt      DateTime    @updatedAt      @map("updated_at")
+
+  //relations
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  orderId       Int
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productId     Int
+
+  @@map("order_detail")
+}
+
+enum Role {
+  CLIENT
+  MANAGER
+}
