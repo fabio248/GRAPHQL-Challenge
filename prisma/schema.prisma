@@ -16,8 +16,8 @@ model User {
   password      String
   username      String
   role          Role              @default(CLIENT)
-  createAt      DateTime          @default(now()) @map("created_at")
-  updateAt      DateTime          @updatedAt @map("updated_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
 
   //relations
   car           Car?     
@@ -34,8 +34,8 @@ model Product {
   stock         Int
   price         Decimal
   isEnable      Boolean           @default(false)
-  createAt      DateTime          @default(now()) @map("created_at")
-  updateAt      DateTime          @updatedAt      @map("updated_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt      @map("updated_at")
 
   //relations
   catalog       Catalog           @relation(fields: [catalogId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -51,8 +51,8 @@ model Image {
   id            Int         @default(autoincrement()) @id
   name          String
   url           String
-  createAt      DateTime    @default(now()) @map("created_at")
-  updateAt      DateTime    @updatedAt      @map("updated_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt      @map("updated_at")
 
   //relations
   product       Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -65,8 +65,8 @@ model Catalog {
   id            Int         @default(autoincrement()) @id
   name          String
   description   String
-  createAt      DateTime    @default(now()) @map("created_at")
-  updateAt      DateTime    @updatedAt @map("updated_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
 
   //relations
   Products      Product[]
@@ -76,7 +76,7 @@ model Catalog {
 
 model UserLikeProduct {
   id            Int         @default(autoincrement()) @id
-  createAt      DateTime    @default(now()) @map("created_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
 
   //relations
   product       Product?    @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -91,8 +91,8 @@ model UserLikeProduct {
 model Car {
   id            Int             @default(autoincrement()) @id
   total         Decimal
-  createAt      DateTime        @default(now()) @map("created_at")
-  updateAt      DateTime        @updatedAt      @map("updated_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt      @map("updated_at")
 
   //relations
   user          User            @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -104,8 +104,8 @@ model Car {
 model ProductInCar {
   id            Int         @default(autoincrement()) @id
   quantity      Int
-  createAt      DateTime    @default(now()) @map("created_at")
-  updateAt      DateTime    @updatedAt      @map("updated_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt      @map("updated_at")
 
   //relations
   car           Car         @relation(fields: [carId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -117,8 +117,8 @@ model ProductInCar {
 model Order {
   id            Int         @default(autoincrement()) @id
   total         Decimal
-  createAt      DateTime    @default(now()) @map("created_at")
-  updateAt      DateTime    @updatedAt      @map("updated_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt      @map("updated_at")
 
   //relations
   user          User        @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -130,8 +130,8 @@ model OrderDetail {
   id            Int         @default(autoincrement()) @id
   quantity      Int
   subtotal      Decimal
-  createAt      DateTime    @default(now()) @map("created_at")
-  updateAt      DateTime    @updatedAt      @map("updated_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt      @map("updated_at")
 
   //relations
   order         Order       @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Cascade)
