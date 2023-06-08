@@ -4,14 +4,18 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import JwtAuthenticationGuard from 'src/auth/strategies/jwt/jwt-auth.guard';
+import { Request } from 'express';
+import { PayloadJwt } from 'src/@types/generic';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -24,25 +28,31 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthenticationGuard)
   findAll() {
     return this.usersService.findAll();
   }
 
-  @Get(':userId')
-  findOne(@Param('userId') userId: string) {
-    return this.usersService.findOneById(+userId);
+  @Get('me')
+  @UseGuards(JwtAuthenticationGuard)
+  findOne(@Req() req: Request) {
+    const user = req.user as PayloadJwt;
+    return this.usersService.findOneById(+user.sub);
   }
 
-  @Patch(':userId')
-  update(
-    @Param('userId') userId: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.update(+userId, updateUserDto);
+  @Patch('me')
+  @UseGuards(JwtAuthenticationGuard)
+  update(@Req() req: Request, @Body() updateUserDto: UpdateUserDto) {
+    const user = req.user as PayloadJwt;
+
+    return this.usersService.update(+user.sub, updateUserDto);
   }
 
-  @Delete(':userId')
-  remove(@Param('userId') userId: string) {
-    return this.usersService.remove(+userId);
+  @Delete('me')
+  @UseGuards(JwtAuthenticationGuard)
+  remove(@Req() req: Request) {
+    const user = req.user as PayloadJwt;
+
+    return this.usersService.remove(+user.sub);
   }
 }
