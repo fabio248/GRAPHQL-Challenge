@@ -3,6 +3,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { PrismaService } from './database/prisma.service';
+import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './category/category.module';
 
@@ -14,6 +15,7 @@ import { CatalogModule } from './category/category.module';
     }),
     DatabaseModule,
     UsersModule,
+    ProductsModule,
     AuthModule,
     CatalogModule,
   ],
