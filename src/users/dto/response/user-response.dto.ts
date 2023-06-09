@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Role } from './create-user.dto';
+import { Role } from '../request/create-user.dto';
 
-export class UserDto {
+export class UserResponse {
   @Expose()
   id: number;
 

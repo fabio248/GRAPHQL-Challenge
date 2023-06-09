@@ -1,38 +1,38 @@
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/request/create-user.dto';
+import { UpdateUserDto } from './dto/request/update-user.dto';
 import { GenericRepository } from 'src/shared/repository.interface';
 import { User } from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import { plainToClass } from 'class-transformer';
-import { UserDto } from './dto/user-response.dto';
+import { UserResponse } from './dto/response/user-response.dto';
 import * as Jwt from 'jsonwebtoken';
 import EmailAlreadyTakenExtension from './expections/email-already-taken.expection';
 import UserNotFoundException from './expections/user-not-found.exception';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @Inject('UserRepository')
     private readonly userRepository: GenericRepository<User>,
     private readonly configService: ConfigService,
   ) {}
 
-  async findAll(): Promise<UserDto[]> {
+  async findAll(): Promise<UserResponse[]> {
     const listUser: User[] = await this.userRepository.findAll();
 
-    return listUser.map((user) => plainToClass(UserDto, user));
+    return listUser.map((user) => plainToClass(UserResponse, user));
   }
 
-  async findOneById(userId: number): Promise<UserDto> {
+  async findOneById(userId: number): Promise<UserResponse> {
     const user: User | null = await this.userRepository.findOne({ id: userId });
 
     if (!user) {
-      throw new UserNotFoundException(userId);
+      throw new UserNotFoundException();
     }
 
-    return plainToClass(UserDto, user);
+    return plainToClass(UserResponse, user);
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -41,7 +41,7 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserDto> {
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const isEmailAlreadyTaken = await this.userRepository.findOne({
       email: createUserDto.email,
     });
@@ -55,10 +55,10 @@ export class UsersService {
       password: this.hashPassword(createUserDto.password),
     });
 
-    return plainToClass(UserDto, user);
+    return plainToClass(UserResponse, user);
   }
 
-  update(userId: number, updateUserDto: UpdateUserDto): UserDto {
+  update(userId: number, updateUserDto: UpdateUserDto): UserResponse {
     const { password } = updateUserDto;
 
     const params = {
@@ -70,21 +70,21 @@ export class UsersService {
     };
     const updatedUser = this.userRepository.update(params);
 
-    return plainToClass(UserDto, updatedUser);
+    return plainToClass(UserResponse, updatedUser);
   }
 
-  async remove(userId: number): Promise<UserDto> {
+  async remove(userId: number): Promise<UserResponse> {
     this.findOneById(userId);
     const user = this.userRepository.delete({ id: userId });
 
-    return plainToClass(UserDto, user);
+    return plainToClass(UserResponse, user);
   }
 
   private hashPassword(password: string): string {
     return hashSync(password, 10);
   }
 
-  async createAccessToken(user: UserDto) {
+  async createAccessToken(user: UserResponse) {
     const jwtSecret = this.configService.get('JWT_SECRET');
 
     const payload: Jwt.JwtPayload = this.createPayload(user);
@@ -101,7 +101,7 @@ export class UsersService {
     return accessToken;
   }
 
-  private createPayload(user: UserDto) {
+  private createPayload(user: UserResponse) {
     const payload: Jwt.JwtPayload = {
       sub: user.id.toString(),
       role: user.role,

@@ -9,7 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthenticationGuard } from './strategies/local/local-auth.guard';
 import { Request, Response } from 'express';
-import { UserDto } from 'src/users/dto/user-response.dto';
+import { UserResponse } from 'src/users/dto/response/user-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +22,7 @@ export class AuthController {
     const { user } = req;
 
     const accessToken: string = await this.authService.createAccessToken(
-      user as UserDto,
+      user as UserResponse,
     );
 
     res.json({ accessToken });
