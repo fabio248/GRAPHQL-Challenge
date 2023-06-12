@@ -19,8 +19,16 @@ export class UserService {
     private readonly configService: ConfigService,
   ) {}
 
-  async findAll(): Promise<UserResponse[]> {
-    const listUser: User[] = await this.userRepository.findAll();
+  async findAll(params: {
+    skip?: number;
+    take?: number;
+  }): Promise<UserResponse[]> {
+    const { skip, take } = params;
+
+    const listUser: User[] = await this.userRepository.findAll({
+      skip: skip,
+      take: take,
+    });
 
     return listUser.map((user) => plainToClass(UserResponse, user));
   }

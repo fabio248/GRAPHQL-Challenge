@@ -26,7 +26,7 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsNumber()
-  catalogId: number;
+  categoryId: number;
 
   @IsOptional()
   @IsBoolean()

@@ -18,7 +18,7 @@ export class ProductResponse implements Product {
   price: number;
 
   @Expose()
-  catalogId: number;
+  categoryId: number;
 
   @Exclude()
   isEnable: boolean;

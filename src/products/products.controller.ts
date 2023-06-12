@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
@@ -24,8 +25,31 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Query('skip') skip: number,
+    @Query('take') take: number,
+    @Query('categoryId') categoryId: number,
+    @Query('embedDisabledProducts') disabledProduct: boolean,
+  ) {
+    const EMBEB_DISABLED_PRODUCTS = false;
+
+    return this.productsService.findAll({
+      skip,
+      take,
+      where: {
+        AND: [
+          {
+            categoryId: categoryId ? categoryId : undefined,
+          },
+        ],
+        OR: [
+          { isEnable: true },
+          {
+            isEnable: disabledProduct ? EMBEB_DISABLED_PRODUCTS : true,
+          },
+        ],
+      },
+    });
   }
 
   @Get(':postId')

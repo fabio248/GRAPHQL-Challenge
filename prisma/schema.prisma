@@ -39,8 +39,8 @@ model Product {
   updatedAt     DateTime          @updatedAt      @map("updated_at")
 
   //relations
-  catalog       Catalog           @relation(fields: [catalogId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  catalogId     Int               @map("catalog_id")
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  categoryId     Int              @map("category_id")
   likesUsers    UserLikeProduct[] 
   images        Image[]
   orderDetails  OrderDetail[]
@@ -62,7 +62,7 @@ model Image {
   @@map("image")
 }
 
-model Catalog {
+model Category {
   id            Int         @default(autoincrement()) @id
   name          String
   description   String
@@ -72,7 +72,7 @@ model Catalog {
   //relations
   Products      Product[]
 
-  @@map("catalog")
+  @@map("category")
 }
 
 model UserLikeProduct {

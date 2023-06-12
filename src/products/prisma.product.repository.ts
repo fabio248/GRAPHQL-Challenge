@@ -9,15 +9,25 @@ export default class PrismaProductRepository
 {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(): Promise<Product[]> {
-    return this.prisma.product.findMany();
+  findAll(params: {
+    skip?: number;
+    take?: number;
+    where?: Prisma.ProductWhereInput;
+  }): Promise<Product[]> {
+    const { skip, take, where } = params;
+
+    return this.prisma.product.findMany({
+      skip: skip || 0,
+      take: take || 10,
+      where,
+    });
   }
 
   findOne(where: Prisma.ProductWhereUniqueInput): Promise<Product | null> {
     return this.prisma.product.findUnique({
       where,
       include: {
-        catalog: {
+        category: {
           select: {
             id: true,
             name: true,
@@ -31,7 +41,7 @@ export default class PrismaProductRepository
     return this.prisma.product.create({
       data,
       include: {
-        catalog: {
+        category: {
           select: {
             id: true,
             name: true,

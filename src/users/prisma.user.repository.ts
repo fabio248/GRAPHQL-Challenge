@@ -7,8 +7,13 @@ import { GenericRepository } from 'src/shared/repository.interface';
 export class PrismaUserRepository implements GenericRepository<User> {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  findAll(params: { skip?: number; take?: number }): Promise<User[]> {
+    const { skip, take } = params;
+
+    return this.prisma.user.findMany({
+      skip: skip || 0,
+      take: take || 10,
+    });
   }
 
   findOne(where: Prisma.UserWhereUniqueInput): Promise<User | null> {

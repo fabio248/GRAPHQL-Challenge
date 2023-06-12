@@ -9,6 +9,7 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
@@ -29,8 +30,8 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthenticationGuard)
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() skip?: number, @Query() take?: number) {
+    return this.usersService.findAll({ skip, take });
   }
 
   @Get('me')

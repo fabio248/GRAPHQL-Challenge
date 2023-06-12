@@ -1,31 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { Catalog, Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma.service';
 import { GenericRepository } from 'src/shared/repository.interface';
 
 @Injectable()
-export default class PrismaCatalogRepository
-  implements GenericRepository<Catalog>
+export default class PrismaCategoryatalogRepository
+  implements GenericRepository<Category>
 {
   constructor(private readonly prisma: PrismaService) {}
-  findAll(): Promise<Catalog[]> {
-    return this.prisma.catalog.findMany();
+  findAll(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.CategoryWhereUniqueInput;
+    where?: Prisma.CategoryWhereInput;
+  }): Promise<Category[]> {
+    const { skip, take, cursor, where } = params;
+
+    return this.prisma.category.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+    });
   }
-  findOne(where: Prisma.CatalogWhereUniqueInput): Promise<Catalog | null> {
-    return this.prisma.catalog.findUnique({ where });
+  findOne(where: Prisma.CategoryWhereUniqueInput): Promise<Category | null> {
+    return this.prisma.category.findUnique({ where });
   }
-  create(data: Prisma.CatalogCreateInput): Promise<Catalog> {
-    return this.prisma.catalog.create({ data });
+  create(data: Prisma.CategoryCreateInput): Promise<Category> {
+    return this.prisma.category.create({ data });
   }
   update(params: {
-    where: Prisma.CatalogWhereUniqueInput;
-    data: Prisma.CatalogUpdateInput;
-  }): Promise<Catalog> {
+    where: Prisma.CategoryWhereUniqueInput;
+    data: Prisma.CategoryUpdateInput;
+  }): Promise<Category> {
     const { where, data } = params;
 
-    return this.prisma.catalog.update({ where, data });
+    return this.prisma.category.update({ where, data });
   }
-  delete(where: Prisma.CatalogWhereUniqueInput): Promise<Catalog> {
-    return this.prisma.catalog.delete({ where });
+  delete(where: Prisma.CategoryWhereUniqueInput): Promise<Category> {
+    return this.prisma.category.delete({ where });
   }
 }
