@@ -9,10 +9,13 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Query,
+  Res,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
 import { UpdateProductDto } from './dto/request/update-product.dto';
+import { Response } from 'express';
+import { Product } from '@prisma/client';
 
 @Controller('products')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -31,7 +34,8 @@ export class ProductsController {
     @Query('categoryId') categoryId: number,
     @Query('embedDisabledProducts') disabledProduct: boolean,
   ) {
-    const EMBEB_DISABLED_PRODUCTS = false;
+    const ONLY_ENABLE_PRODUCTS = true;
+    const EMBED_DISABLE_PRODUCTS = !disabledProduct;
 
     return this.productsService.findAll({
       skip,
@@ -43,9 +47,8 @@ export class ProductsController {
           },
         ],
         OR: [
-          { isEnable: true },
           {
-            isEnable: disabledProduct ? EMBEB_DISABLED_PRODUCTS : true,
+            isEnable: EMBED_DISABLE_PRODUCTS ?? ONLY_ENABLE_PRODUCTS,
           },
         ],
       },
@@ -53,20 +56,21 @@ export class ProductsController {
   }
 
   @Get(':postId')
-  findOne(@Param('postId') id: string) {
-    return this.productsService.findOne(+id);
+  findOne(@Param('postId') postId: string) {
+    return this.productsService.findOne(+postId);
   }
 
   @Patch(':postId')
   update(
-    @Param('postId') id: string,
+    @Param('postId') postId: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    return this.productsService.update(+id, updateProductDto);
+    return this.productsService.update(+postId, updateProductDto);
   }
 
   @Delete(':postId')
-  remove(@Param('postId') id: string) {
-    return this.productsService.remove(+id);
+  async remove(@Res() res: Response, @Param('postId') postId: string) {
+    const product: Product = await this.productsService.remove(+postId);
+    res.json({ message: `product deleted with ${product.id}` });
   }
 }

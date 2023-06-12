@@ -20,7 +20,7 @@ export class ProductResponse implements Product {
   @Expose()
   categoryId: number;
 
-  @Exclude()
+  @Expose()
   isEnable: boolean;
 
   @Exclude()

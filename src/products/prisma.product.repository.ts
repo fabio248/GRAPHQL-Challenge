@@ -19,7 +19,10 @@ export default class PrismaProductRepository
     return this.prisma.product.findMany({
       skip: skip || 0,
       take: take || 10,
-      where,
+      where: {
+        AND: where ? where.AND : undefined,
+        OR: where ? where.OR : undefined,
+      },
     });
   }
 

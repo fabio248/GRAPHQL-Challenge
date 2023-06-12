@@ -5,6 +5,7 @@ import { GenericRepository } from 'src/shared/repository.interface';
 import { Prisma, Product } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.dto';
+import ProductNotFound from './exceptions/product-not-found.expection';
 
 @Injectable()
 export class ProductsService {
@@ -14,8 +15,8 @@ export class ProductsService {
     private readonly productRepository: GenericRepository<Product>,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<ProductResponse> {
-    const product: Product = await this.productRepository.create({
+  create(createProductDto: CreateProductDto): ProductResponse {
+    const product = this.productRepository.create({
       ...createProductDto,
       price: +createProductDto.price,
     });
@@ -26,7 +27,7 @@ export class ProductsService {
     skip?: number;
     take?: number;
     where?: Prisma.ProductWhereInput;
-  }) {
+  }): Promise<ProductResponse[]> {
     const { skip, take, where } = params;
 
     const listProduct: Product[] = await this.productRepository.findAll({
@@ -40,15 +41,34 @@ export class ProductsService {
     );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number): Promise<ProductResponse> {
+    const product: Product | null = await this.productRepository.findOne({
+      id,
+    });
+
+    if (!product) {
+      throw new ProductNotFound();
+    }
+
+    return plainToInstance(ProductResponse, product);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<ProductResponse> {
+    await this.findOne(id);
+
+    const product = this.productRepository.update({
+      where: { id },
+      data: updateProductDto,
+    });
+
+    return plainToInstance(ProductResponse, product);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: number): Promise<Product> {
+    await this.findOne(id);
+    return await this.productRepository.delete({ id });
   }
 }
