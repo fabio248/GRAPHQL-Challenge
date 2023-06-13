@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { CatalogService } from './category.service';
+import { CategoryService } from './category.service';
 import { CreateCatalogDto } from './dto/request/create-category.dto';
 
 @Controller('categories')
 export class CatalogController {
-  constructor(private readonly catalogService: CatalogService) {}
+  constructor(private readonly catalogService: CategoryService) {}
 
   @Post()
   create(@Body() createCatalogDto: CreateCatalogDto) {

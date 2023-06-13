@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 
-export default class CatalogNotFoundException extends NotFoundException {
+export default class CategoryNotFoundException extends NotFoundException {
   constructor() {
     super('catalog not found');
   }

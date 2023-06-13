@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Category, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
-import { GenericRepository } from 'src/shared/repository.interface';
+import { GenericRepository } from '../shared/repository.interface';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
-export default class PrismaCategoryatalogRepository
+export default class PrismaCategoryRepository
   implements GenericRepository<Category>
 {
   constructor(private readonly prisma: PrismaService) {}

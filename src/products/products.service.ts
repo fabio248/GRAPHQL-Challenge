@@ -5,7 +5,7 @@ import { GenericRepository } from 'src/shared/repository.interface';
 import { Prisma, Product } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.dto';
-import ProductNotFound from './exceptions/product-not-found.expection';
+import ProductNotFoundException from './exceptions/product-not-found.expection';
 
 @Injectable()
 export class ProductsService {
@@ -26,9 +26,20 @@ export class ProductsService {
   async findAll(params: {
     skip?: number;
     take?: number;
-    where?: Prisma.ProductWhereInput;
+    disabledProduct?: boolean;
+    categoryId?: number;
   }): Promise<ProductResponse[]> {
-    const { skip, take, where } = params;
+    const { skip, take, disabledProduct, categoryId } = params;
+    const where: Prisma.ProductWhereInput = {};
+    where.OR = [{ isEnable: true }];
+
+    if (categoryId) {
+      where.AND = { categoryId };
+    }
+
+    if (disabledProduct) {
+      where.OR.push({ isEnable: false });
+    }
 
     const listProduct: Product[] = await this.productRepository.findAll({
       skip,
@@ -41,13 +52,13 @@ export class ProductsService {
     );
   }
 
-  async findOne(id: number): Promise<ProductResponse> {
+  async findOneById(id: number): Promise<ProductResponse> {
     const product: Product | null = await this.productRepository.findOne({
       id,
     });
 
     if (!product) {
-      throw new ProductNotFound();
+      throw new ProductNotFoundException();
     }
 
     return plainToInstance(ProductResponse, product);
@@ -57,7 +68,7 @@ export class ProductsService {
     id: number,
     updateProductDto: UpdateProductDto,
   ): Promise<ProductResponse> {
-    await this.findOne(id);
+    await this.findOneById(id);
 
     const product = this.productRepository.update({
       where: { id },
@@ -68,7 +79,7 @@ export class ProductsService {
   }
 
   async remove(id: number): Promise<Product> {
-    await this.findOne(id);
+    await this.findOneById(id);
     return await this.productRepository.delete({ id });
   }
 }

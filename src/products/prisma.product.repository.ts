@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Product, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
-import { GenericRepository } from 'src/shared/repository.interface';
+import { PrismaService } from '../database/prisma.service';
+import { GenericRepository } from '../shared/repository.interface';
 
 @Injectable()
 export default class PrismaProductRepository
@@ -19,10 +19,7 @@ export default class PrismaProductRepository
     return this.prisma.product.findMany({
       skip: skip || 0,
       take: take || 10,
-      where: {
-        AND: where ? where.AND : undefined,
-        OR: where ? where.OR : undefined,
-      },
+      where,
     });
   }
 

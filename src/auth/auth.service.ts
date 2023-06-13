@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/users/users.service';
-import { UnauthorizedException } from '@nestjs/common';
+import { UserService } from '../users/users.service';
 import { User } from '@prisma/client';
-import { compareSync } from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { plainToClass } from 'class-transformer';
-import { UserResponse } from 'src/users/dto/response/user-response.dto';
+import { UserResponse } from '../users/dto/response/user-response.dto';
+import AuthUnauthorizedException from './exception/unauthoried.expection';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +14,7 @@ export class AuthService {
     const user: User | null = await this.userService.findOneByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('credentials invalids');
+      throw new AuthUnauthorizedException();
     }
 
     const isMatchPassword: boolean = this.verifyPassword(
@@ -23,7 +23,7 @@ export class AuthService {
     );
 
     if (!isMatchPassword) {
-      throw new UnauthorizedException('credentials invalids');
+      throw new AuthUnauthorizedException();
     }
 
     return plainToClass(UserResponse, user);
@@ -34,6 +34,6 @@ export class AuthService {
   }
 
   verifyPassword(password: string, encrytedPassword: string): boolean {
-    return compareSync(password, encrytedPassword);
+    return bcrypt.compareSync(password, encrytedPassword);
   }
 }

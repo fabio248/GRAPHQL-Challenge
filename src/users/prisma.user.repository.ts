@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
-import { GenericRepository } from 'src/shared/repository.interface';
+import { PrismaService } from '../database/prisma.service';
+import { GenericRepository } from '../shared/repository.interface';
 
 @Injectable()
 export class PrismaUserRepository implements GenericRepository<User> {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(params: { skip?: number; take?: number }): Promise<User[]> {
+  async findAll(params: { skip?: number; take?: number }): Promise<User[]> {
     const { skip, take } = params;
 
     return this.prisma.user.findMany({
@@ -16,15 +16,15 @@ export class PrismaUserRepository implements GenericRepository<User> {
     });
   }
 
-  findOne(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  async findOne(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.prisma.user.findUnique({ where });
   }
 
-  create(data: Prisma.UserCreateInput): Promise<User> {
+  async create(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({ data });
   }
 
-  update(params: {
+  async update(params: {
     where: Prisma.UserWhereUniqueInput;
     data: Prisma.UserUpdateInput;
   }): Promise<User> {
@@ -36,7 +36,7 @@ export class PrismaUserRepository implements GenericRepository<User> {
     });
   }
 
-  delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
+  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
     return this.prisma.user.delete({ where });
   }
 }

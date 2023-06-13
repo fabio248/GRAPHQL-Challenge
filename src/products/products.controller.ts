@@ -16,6 +16,7 @@ import { CreateProductDto } from './dto/request/create-product.dto';
 import { UpdateProductDto } from './dto/request/update-product.dto';
 import { Response } from 'express';
 import { Product } from '@prisma/client';
+import DeleteMessageProduct from './message-response/delete-message.response';
 
 @Controller('products')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -29,35 +30,22 @@ export class ProductsController {
 
   @Get()
   findAll(
-    @Query('skip') skip: number,
-    @Query('take') take: number,
-    @Query('categoryId') categoryId: number,
-    @Query('embedDisabledProducts') disabledProduct: boolean,
+    @Query('embedDisabledProducts') disabledProduct?: boolean,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+    @Query('categoryId') categoryId?: number,
   ) {
-    const ONLY_ENABLE_PRODUCTS = true;
-    const EMBED_DISABLE_PRODUCTS = !disabledProduct;
-
     return this.productsService.findAll({
       skip,
       take,
-      where: {
-        AND: [
-          {
-            categoryId: categoryId ? categoryId : undefined,
-          },
-        ],
-        OR: [
-          {
-            isEnable: EMBED_DISABLE_PRODUCTS ?? ONLY_ENABLE_PRODUCTS,
-          },
-        ],
-      },
+      disabledProduct,
+      categoryId,
     });
   }
 
   @Get(':postId')
   findOne(@Param('postId') postId: string) {
-    return this.productsService.findOne(+postId);
+    return this.productsService.findOneById(+postId);
   }
 
   @Patch(':postId')
@@ -71,6 +59,7 @@ export class ProductsController {
   @Delete(':postId')
   async remove(@Res() res: Response, @Param('postId') postId: string) {
     const product: Product = await this.productsService.remove(+postId);
-    res.json({ message: `product deleted with ${product.id}` });
+
+    res.send(new DeleteMessageProduct(product.id));
   }
 }

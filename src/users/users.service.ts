@@ -5,10 +5,10 @@ import { UpdateUserDto } from './dto/request/update-user.dto';
 import { GenericRepository } from 'src/shared/repository.interface';
 import { User } from '@prisma/client';
 import { hashSync } from 'bcrypt';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { UserResponse } from './dto/response/user-response.dto';
 import * as Jwt from 'jsonwebtoken';
-import EmailAlreadyTakenExtension from './expections/email-already-taken.expection';
+import EmailAlreadyTakenException from './expections/email-already-taken.expection';
 import UserNotFoundException from './expections/user-not-found.exception';
 
 @Injectable()
@@ -30,7 +30,7 @@ export class UserService {
       take: take,
     });
 
-    return listUser.map((user) => plainToClass(UserResponse, user));
+    return listUser.map((user) => plainToInstance(UserResponse, user));
   }
 
   async findOneById(userId: number): Promise<UserResponse> {
@@ -40,7 +40,7 @@ export class UserService {
       throw new UserNotFoundException();
     }
 
-    return plainToClass(UserResponse, user);
+    return plainToInstance(UserResponse, user);
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -55,15 +55,15 @@ export class UserService {
     });
 
     if (isEmailAlreadyTaken) {
-      throw new EmailAlreadyTakenExtension();
+      throw new EmailAlreadyTakenException();
     }
 
-    const user = this.userRepository.create({
+    const user = await this.userRepository.create({
       ...createUserDto,
       password: this.hashPassword(createUserDto.password),
     });
 
-    return plainToClass(UserResponse, user);
+    return plainToInstance(UserResponse, user);
   }
 
   update(userId: number, updateUserDto: UpdateUserDto): UserResponse {
@@ -78,14 +78,14 @@ export class UserService {
     };
     const updatedUser = this.userRepository.update(params);
 
-    return plainToClass(UserResponse, updatedUser);
+    return plainToInstance(UserResponse, updatedUser);
   }
 
   async remove(userId: number): Promise<UserResponse> {
     this.findOneById(userId);
     const user = this.userRepository.delete({ id: userId });
 
-    return plainToClass(UserResponse, user);
+    return plainToInstance(UserResponse, user);
   }
 
   private hashPassword(password: string): string {

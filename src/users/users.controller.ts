@@ -14,7 +14,7 @@ import {
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
-import JwtAuthenticationGuard from 'src/auth/strategies/jwt/jwt-auth.guard';
+import JwtAuthenticationGuard from '../auth/strategies/jwt/jwt-auth.guard';
 import { Request } from 'express';
 import { PayloadJwt } from 'src/@types/generic';
 
@@ -30,7 +30,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthenticationGuard)
-  findAll(@Query() skip?: number, @Query() take?: number) {
+  findAll(@Query('skip') skip: number, @Query('take') take: number) {
     return this.usersService.findAll({ skip, take });
   }
 
