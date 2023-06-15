@@ -9,35 +9,35 @@ export default class PrismaProductRepository
 {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(params: {
+  async findAll(params: {
     skip?: number;
     take?: number;
     where?: Prisma.ProductWhereInput;
+    include?: Prisma.ProductInclude;
   }): Promise<Product[]> {
-    const { skip, take, where } = params;
+    const { skip, take, where, include } = params;
 
     return this.prisma.product.findMany({
       skip: skip || 0,
       take: take || 10,
       where,
+      include,
     });
   }
 
-  findOne(where: Prisma.ProductWhereUniqueInput): Promise<Product | null> {
+  async findOne(
+    where: Prisma.ProductWhereUniqueInput,
+  ): Promise<Product | null> {
     return this.prisma.product.findUnique({
       where,
       include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        category: true,
+        images: true,
       },
     });
   }
 
-  create(data: Prisma.ProductCreateInput): Promise<Product> {
+  async create(data: Prisma.ProductCreateInput): Promise<Product> {
     return this.prisma.product.create({
       data,
       include: {
@@ -51,7 +51,7 @@ export default class PrismaProductRepository
     });
   }
 
-  update(params: {
+  async update(params: {
     where: Prisma.ProductWhereUniqueInput;
     data: Prisma.ProductCreateInput;
   }): Promise<Product> {
@@ -60,7 +60,7 @@ export default class PrismaProductRepository
     return this.prisma.product.update({ where, data });
   }
 
-  delete(where: Prisma.ProductWhereUniqueInput): Promise<Product> {
+  async delete(where: Prisma.ProductWhereUniqueInput): Promise<Product> {
     return this.prisma.product.delete({ where });
   }
 }

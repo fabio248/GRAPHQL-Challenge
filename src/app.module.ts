@@ -6,6 +6,8 @@ import { PrismaService } from './database/prisma.service';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './category/category.module';
+import { ImageModule } from './image/image.module';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { CatalogModule } from './category/category.module';
     ProductsModule,
     AuthModule,
     CatalogModule,
+    ImageModule,
+    AwsModule,
   ],
   controllers: [],
   providers: [PrismaService],

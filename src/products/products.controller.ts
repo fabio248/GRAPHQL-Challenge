@@ -31,6 +31,7 @@ export class ProductsController {
   @Get()
   findAll(
     @Query('embedDisabledProducts') disabledProduct?: boolean,
+    @Query('notEmbedImages') notImages?: boolean,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
     @Query('categoryId') categoryId?: number,
@@ -40,6 +41,7 @@ export class ProductsController {
       take,
       disabledProduct,
       categoryId,
+      notImages,
     });
   }
 

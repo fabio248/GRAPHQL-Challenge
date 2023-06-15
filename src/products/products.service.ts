@@ -28,10 +28,15 @@ export class ProductsService {
     take?: number;
     disabledProduct?: boolean;
     categoryId?: number;
+    notImages?: boolean;
   }): Promise<ProductResponse[]> {
-    const { skip, take, disabledProduct, categoryId } = params;
+    const { skip, take, disabledProduct, categoryId, notImages } = params;
+
     const where: Prisma.ProductWhereInput = {};
     where.OR = [{ isEnable: true }];
+
+    const include: Prisma.ProductInclude = {};
+    include.images = true;
 
     if (categoryId) {
       where.AND = { categoryId };
@@ -41,10 +46,15 @@ export class ProductsService {
       where.OR.push({ isEnable: false });
     }
 
+    if (notImages) {
+      include.images = false;
+    }
+
     const listProduct: Product[] = await this.productRepository.findAll({
       skip,
       take,
       where,
+      include,
     });
 
     return listProduct.map((product) =>

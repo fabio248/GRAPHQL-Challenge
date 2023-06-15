@@ -1,5 +1,7 @@
-import { Exclude, Expose } from 'class-transformer';
-import { Product } from '@prisma/client';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { Category, Image, Product } from '@prisma/client';
+import ImageProductResponse from './image-product-response.dto';
+import CategoryProductResponse from './category-product-response.dto';
 
 export class ProductResponse implements Product {
   @Expose()
@@ -17,7 +19,7 @@ export class ProductResponse implements Product {
   @Expose()
   price: number;
 
-  @Expose()
+  @Exclude()
   categoryId: number;
 
   @Expose()
@@ -29,7 +31,11 @@ export class ProductResponse implements Product {
   @Exclude()
   updatedAt: Date;
 
-  constructor(partial: Partial<ProductResponse>) {
-    Object.assign(this, partial);
-  }
+  @Expose()
+  @Type(() => ImageProductResponse)
+  images: Image[];
+
+  @Expose()
+  @Type(() => CategoryProductResponse)
+  category: Category;
 }

@@ -15,13 +15,13 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  const config = new DocumentBuilder()
+  const configurationSwagger = new DocumentBuilder()
     .setTitle('Tiny Store')
     .setDescription('REST API for cat store')
     .setVersion('1.0')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, configurationSwagger);
   SwaggerModule.setup('api/documentation', app, document);
 
   const port = configService.get<number>('port', 3000);
