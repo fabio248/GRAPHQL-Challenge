@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Role } from '../request/create-user.dto';
+import { Cart } from '@prisma/client';
 
 export class UserResponse {
   @Expose()
@@ -25,4 +26,7 @@ export class UserResponse {
 
   @Exclude()
   password: string;
+
+  @Expose()
+  cart: Cart;
 }

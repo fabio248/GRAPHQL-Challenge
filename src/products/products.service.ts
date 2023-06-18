@@ -67,7 +67,7 @@ export class ProductsService {
       id,
     });
 
-    if (!product) {
+    if (!product || product.isEnable !== this.PRODUCT_IS_ENABLE) {
       throw new ProductNotFoundException();
     }
 

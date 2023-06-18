@@ -21,7 +21,7 @@ model User {
   updatedAt     DateTime          @updatedAt @map("updated_at")
 
   //relations
-  car           Car?     
+  cart           Cart?     
   orders        Order[]         
   likesProducts UserLikeProduct[] 
 
@@ -39,11 +39,12 @@ model Product {
   updatedAt     DateTime          @updatedAt      @map("updated_at")
 
   //relations
-  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  categoryId     Int              @map("category_id")
+  category      Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  categoryId    Int              @map("category_id")
   likesUsers    UserLikeProduct[] 
   images        Image[]
   orderDetails  OrderDetail[]
+  productInCart ProductInCar[]
 
   @@map("product")
 }
@@ -89,9 +90,9 @@ model UserLikeProduct {
   @@map("user_like_post")
 }
 
-model Car {
+model Cart {
   id            Int             @default(autoincrement()) @id
-  total         Float
+  total         Float           @default(0)
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt      @map("updated_at")
 
@@ -100,18 +101,21 @@ model Car {
   userId        Int             @map("user_id") @unique
   products      ProductInCar[]
 
-  @@map("car")
+  @@map("cart")
 }
 model ProductInCar {
-  id            Int         @default(autoincrement()) @id
   quantity      Int
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt      @map("updated_at")
+  subtotal      Float        @default(0)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt      @map("updated_at")
 
   //relations
-  car           Car         @relation(fields: [carId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  carId         Int         @map("car_id")
+  cart           Cart        @relation(fields: [cartId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cartId         Int         @map("car_id")
+  product        Product     @relation(fields: [productId] ,references: [id])
+  productId      Int         @map("product_id")
 
+  @@id([cartId,productId])
   @@map("product_in_car")
 }
 
@@ -142,6 +146,7 @@ model OrderDetail {
   product       Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   productId     Int         @map("product_id")
 
+  
   @@map("order_detail")
 }
 

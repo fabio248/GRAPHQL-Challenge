@@ -7,7 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './category/category.module';
 import { ImageModule } from './image/image.module';
-import { AwsModule } from './aws/aws.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { AwsModule } from './aws/aws.module';
     AuthModule,
     CatalogModule,
     ImageModule,
-    AwsModule,
+    CartModule,
   ],
   controllers: [],
   providers: [PrismaService],

@@ -17,7 +17,10 @@ export class PrismaUserRepository implements GenericRepository<User> {
   }
 
   async findOne(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.prisma.user.findUnique({ where });
+    return this.prisma.user.findUnique({
+      where,
+      include: { cart: true, orders: true },
+    });
   }
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
