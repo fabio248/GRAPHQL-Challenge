@@ -3,17 +3,18 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CartService } from './services/cart.service';
-import { UpdateCartDto } from './dto/request/update-cart.dto';
 import ProductInCartService from './services/product-in-cart.service';
 import CreateProductInCarDto from './dto/request/create-product-in-cat';
 import RemoveProductInCartDto from './dto/request/remove-product-in-cart.dto';
 import RoleGuard from '../auth/strategies/role.guard';
+import { Request } from 'express';
+import { PayloadJwt } from '../types/generic';
 
 @Controller('carts')
 export class CartController {
@@ -38,24 +39,20 @@ export class CartController {
   }
 
   @Get()
-  @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
+  @UseGuards(RoleGuard('MANAGER'))
   findAll() {
     return this.cartService.findAll();
   }
 
-  @Get(':cartId')
-  @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
-  findOne(@Param('cartId') id: string) {
-    return this.cartService.findOneById(+id);
+  @Get('/me')
+  @UseGuards(RoleGuard('CLIENT'))
+  findOne(@Req() req: Request) {
+    const user = req.user as PayloadJwt;
+
+    return this.cartService.findOneByUserId(+user.sub);
   }
 
-  @Patch(':cartId')
-  @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
-  update(@Param('cartId') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':cartId/remove-product')
+  @Delete('me/:cartId/remove-product')
   @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
   remove(
     @Param('cartId') cartId: string,

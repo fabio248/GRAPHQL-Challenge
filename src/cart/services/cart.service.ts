@@ -18,7 +18,7 @@ export class CartService {
 
   async create(userId: number): Promise<CartResponse> {
     await this.userService.findOneById(userId);
-    const isUserHaveAlreadyCar = await this.findOneByUserId(userId);
+    const isUserHaveAlreadyCar = await this.findOneByUserIdWithOutError(userId);
 
     if (isUserHaveAlreadyCar) {
       throw new UserAlreadyHaveCartException();
@@ -38,6 +38,16 @@ export class CartService {
 
     if (!cart) {
       throw new CartNotFoundException();
+    }
+
+    return plainToInstance(CartResponse, cart);
+  }
+
+  async findOneByUserId(userId: number) {
+    const cart = await this.cartRepository.findOne({ userId });
+
+    if (!cart) {
+      return this.create(userId);
     }
 
     return plainToInstance(CartResponse, cart);
@@ -64,7 +74,9 @@ export class CartService {
     await this.update(cart.id, { total: newTotal });
   }
 
-  private async findOneByUserId(userId: number): Promise<Cart | null> {
+  private async findOneByUserIdWithOutError(
+    userId: number,
+  ): Promise<Cart | null> {
     return this.cartRepository.findOne({ userId });
   }
 

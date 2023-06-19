@@ -20,5 +20,9 @@ import PrismaProductInCarRepository from './repositories/product-in-cart.reposit
     ProductInCartService,
   ],
   controllers: [CartController],
+  exports: [
+    CartService,
+    { provide: 'CartRepository', useClass: PrismaCartRepository },
+  ],
 })
 export class CartModule {}

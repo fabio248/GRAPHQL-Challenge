@@ -16,7 +16,7 @@ import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
 import JwtAuthenticationGuard from '../auth/strategies/jwt/jwt-auth.guard';
 import { Request } from 'express';
-import { PayloadJwt } from 'src/@types/generic';
+import { PayloadJwt } from 'src/types/generic';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)

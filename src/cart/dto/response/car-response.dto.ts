@@ -21,5 +21,5 @@ export default class CartResponse implements Cart {
 
   @Expose()
   @Type(() => ProductInCarResponse)
-  products: ProductInCar[];
+  products: ProductInCarResponse[];
 }

@@ -25,9 +25,7 @@ export default class ProductInCartService {
       data.productId,
     );
 
-    if (product.stock >= data.quantity) {
-      throw new NoEnoughStockException();
-    }
+    await this.productService.checkEnoughStock(product.id, data.quantity);
 
     const producInCar = await this.isProductAlreadyAddedCart(
       cartId,
@@ -59,8 +57,8 @@ export default class ProductInCartService {
     const newQuantity = productInCar.quantity + quantity;
     const newsubTotal = productInCar.subtotal + quantity * product.price;
 
-    if (product.stock >= newQuantity) {
-      throw new NoEnoughStockException();
+    if (product.stock < newQuantity) {
+      throw new NoEnoughStockException(product.id);
     }
 
     const updatedProductInCar = await this.productInCartRepository.update({
@@ -100,6 +98,7 @@ export default class ProductInCartService {
 
   async remove(cartId: number, productId: number) {
     const cart = await this.cartService.findOneById(cartId);
+
     //Check if the product in cart exists
     await this.findOneById(cartId, productId);
 

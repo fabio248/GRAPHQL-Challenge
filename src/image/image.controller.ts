@@ -1,7 +1,6 @@
 import {
   ClassSerializerInterceptor,
   Controller,
-  Get,
   Param,
   Post,
   UploadedFile,

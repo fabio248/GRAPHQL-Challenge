@@ -1,4 +1,4 @@
-/// <reference types="./@types/express.d.ts" />
+/// <reference types="./types/types.d.ts" />
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';

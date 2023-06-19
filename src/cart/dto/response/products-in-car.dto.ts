@@ -26,6 +26,6 @@ export default class ProductInCarResponse implements ProductInCar {
   @Exclude()
   cartId: number;
 
-  @Exclude()
+  @Expose()
   productId: number;
 }
