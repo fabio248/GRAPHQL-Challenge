@@ -42,8 +42,4 @@ $ npm run test:cov
 
 ## Stay in touch
 
-If you want to use my s3 bucket reach me out on slack and I will give you the credentials
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+If you want to use my s3 bucket reach me out on slack (@fabioflores) and I will give you the credentials
