@@ -96,14 +96,14 @@ export default class ProductInCartService {
     return productInCar;
   }
 
-  async remove(cartId: number, productId: number) {
-    const cart = await this.cartService.findOneById(cartId);
-
+  async remove(userId: number, productId: number) {
+    const cart = await this.cartService.findOneByUserId(userId);
+    console.log({ cart });
     //Check if the product in cart exists
-    await this.findOneById(cartId, productId);
+    await this.findOneById(cart.id, productId);
 
     const productInCar = await this.productInCartRepository.delete({
-      cartId_productId: { cartId, productId },
+      cartId_productId: { cartId: cart.id, productId },
     });
 
     await this.cartService.decreaseTotalAmount(cart, productInCar.subtotal);

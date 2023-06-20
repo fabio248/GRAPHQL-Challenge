@@ -18,13 +18,13 @@ export class CartService {
 
   async create(userId: number): Promise<CartResponse> {
     await this.userService.findOneById(userId);
-    const isUserHaveAlreadyCar = await this.findOneByUserIdWithOutError(userId);
+    const isUserHaveAlreadyCar = await this.cartRepository.findOne({ userId });
 
     if (isUserHaveAlreadyCar) {
       throw new UserAlreadyHaveCartException();
     }
 
-    const car = this.cartRepository.create({ userId });
+    const car = await this.cartRepository.create({ userId });
 
     return plainToInstance(CartResponse, car);
   }
@@ -47,13 +47,17 @@ export class CartService {
     const cart = await this.cartRepository.findOne({ userId });
 
     if (!cart) {
-      return this.create(userId);
+      const newCart = await this.cartRepository.create({ userId });
+
+      return plainToInstance(CartResponse, newCart);
     }
 
     return plainToInstance(CartResponse, cart);
   }
 
-  update(id: number, updateCartDto: UpdateCartDto) {
+  async update(id: number, updateCartDto: UpdateCartDto) {
+    await this.findOneById(id);
+
     return this.cartRepository.update({ where: { id }, data: updateCartDto });
   }
 
@@ -72,12 +76,6 @@ export class CartService {
     const newTotal = cart.total - subtotal;
 
     await this.update(cart.id, { total: newTotal });
-  }
-
-  private async findOneByUserIdWithOutError(
-    userId: number,
-  ): Promise<Cart | null> {
-    return this.cartRepository.findOne({ userId });
   }
 
   async replaceTotalAmount(cart: CartResponse, subtotal: number) {

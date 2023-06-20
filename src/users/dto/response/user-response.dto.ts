@@ -1,6 +1,7 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { Role } from '../request/create-user.dto';
-import { Cart } from '@prisma/client';
+import { Cart, Order } from '@prisma/client';
+import CartResponse from '../../../cart/dto/response/car-response.dto';
 
 export class UserResponse {
   @Expose()
@@ -28,5 +29,9 @@ export class UserResponse {
   password: string;
 
   @Expose()
+  @Type(() => CartResponse)
   cart: Cart;
+
+  @Exclude()
+  orders: Order[];
 }

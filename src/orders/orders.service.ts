@@ -1,21 +1,22 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CartService } from '../cart/services/cart.service';
 import { PrismaService } from '../database/prisma.service';
-import { GenericRepository } from '../shared/repository.interface';
-import { Order } from '@prisma/client';
 import OrderResponse from './dto/order-response.dto';
 import { plainToInstance } from 'class-transformer';
+import NoProductsInCarException from './exception/no-product-in-cart.exception';
+import { OrderRepository } from '../shared/repository.interface';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @Inject('OrderRepository')
-    private readonly orderRepository: GenericRepository<Order>,
+    private readonly orderRepository: OrderRepository,
     private readonly cartService: CartService,
     private readonly prisma: PrismaService,
   ) {}
 
   async create(userId: number) {
+    const POSITION_ORDER = 0;
     const NOT_PRODUCTS_IN_CART = 0;
     const productToUpdateStock = [];
     const clearProductInCart = [];
@@ -27,7 +28,7 @@ export class OrdersService {
     } = await this.cartService.findOneByUserId(userId);
 
     if (productsInCar.length === NOT_PRODUCTS_IN_CART) {
-      throw new BadRequestException('add products to your cart!');
+      throw new NoProductsInCarException();
     }
 
     for (const { product, quantity } of productsInCar) {
@@ -95,7 +96,7 @@ export class OrdersService {
       ...productToUpdateStock,
     ]);
 
-    return plainToInstance(OrderResponse, response[0]);
+    return plainToInstance(OrderResponse, response[POSITION_ORDER]);
   }
 
   async findAll(skip?: number, take?: number, userId?: number) {

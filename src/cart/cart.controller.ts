@@ -44,7 +44,7 @@ export class CartController {
     return this.cartService.findAll();
   }
 
-  @Get('/me')
+  @Get('/my-cart')
   @UseGuards(RoleGuard('CLIENT'))
   findOne(@Req() req: Request) {
     const user = req.user as PayloadJwt;
@@ -52,14 +52,16 @@ export class CartController {
     return this.cartService.findOneByUserId(+user.sub);
   }
 
-  @Delete('me/:cartId/remove-product')
+  @Delete('my-cart/remove-product')
   @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
   remove(
-    @Param('cartId') cartId: string,
+    @Req() req: Request,
     @Body() removeProductInCartDto: RemoveProductInCartDto,
   ) {
+    const user = req.user as PayloadJwt;
+
     return this.productInCarService.remove(
-      +cartId,
+      +user.sub,
       removeProductInCartDto.productId,
     );
   }

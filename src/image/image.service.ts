@@ -8,6 +8,7 @@ import { S3, CompleteMultipartUploadCommandOutput } from '@aws-sdk/client-s3';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
 import ImageReponse from './dto/response/image-response.dto';
+import NoFileException from './exception/not-file.exception';
 
 @Injectable()
 export class ImageService {
@@ -28,6 +29,10 @@ export class ImageService {
   }
 
   async uploadFile(file: Express.Multer.File, filename: string) {
+    if (!file) {
+      throw new NoFileException();
+    }
+
     const { buffer, mimetype, originalname } = file;
 
     const name = `${uuid()}-${filename}.${this.getTypeFile(originalname)}`;

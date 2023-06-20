@@ -5,13 +5,11 @@ import { PayloadJwt } from '../../types/generic';
 
 const RoleGuard = (...roles: string[]): Type<CanActivate> => {
   class RoleGuardMinxin extends JwtAuthenticationGuard {
-    async CanActivate(context: ExecutionContext) {
+    async canActivate(context: ExecutionContext) {
       await super.canActivate(context);
 
-      const req = context
-        .switchToHttp()
-        .getRequest<Request & { user: PayloadJwt }>();
-      const user = req.user;
+      const req = context.switchToHttp().getRequest<Request>();
+      const user = req.user as PayloadJwt;
 
       return roles.includes(user.role);
     }

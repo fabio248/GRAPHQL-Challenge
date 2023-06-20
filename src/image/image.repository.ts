@@ -12,6 +12,6 @@ export default class PrismaImageRepository implements ImageRepository {
   }
 
   async findOne(where: Prisma.ImageWhereUniqueInput): Promise<Image | null> {
-    return this.prisma.image.findUniqueOrThrow({ where });
+    return this.prisma.image.findUnique({ where });
   }
 }

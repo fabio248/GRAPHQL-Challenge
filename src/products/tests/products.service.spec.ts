@@ -4,16 +4,23 @@ import {
   MockContextProductRepo,
   createMockProductRepo,
 } from '../../shared/mocks/product/product.repository.mock';
-import { buildProduct, getDescription } from '../../shared/generate';
-import { Product } from '@prisma/client';
+import { buildProduct, getDescription, getId } from '../../shared/generate';
+import { Product, UserLikeProduct } from '@prisma/client';
 import { CreateProductDto } from '../dto/request/create-product.dto';
 import { UpdateProductDto } from '../dto/request/update-product.dto';
 import ProductNotFoundException from '../exceptions/product-not-found.expection';
+import NoEnoughStockException from '../../cart/expections/no-enough-stock.exception';
+import UserAlreadyLikeProductException from '../exceptions/user-already-liked-product.exception';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let mockRepository: MockContextProductRepo;
-  const product = buildProduct() as unknown as Product;
+  const product = buildProduct({
+    isEnable: true,
+    category: undefined,
+    id: undefined,
+    images: undefined,
+  }) as unknown as Product;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,11 +52,18 @@ describe('ProductsService', () => {
   });
 
   describe('findAll', () => {
+    const categoryId = getId;
+    const disabledProduct = true;
+    const notImages = true;
     it('should return a list of products', async () => {
       const listProduct = [product, product, product];
       mockRepository.findAll.mockResolvedValueOnce(listProduct);
 
-      const actual = await service.findAll({});
+      const actual = await service.findAll({
+        categoryId,
+        disabledProduct,
+        notImages,
+      });
 
       expect(actual).toEqual(listProduct);
       expect(mockRepository.findAll).toHaveBeenCalledTimes(1);
@@ -101,6 +115,52 @@ describe('ProductsService', () => {
       expect(actual).rejects.toEqual(new ProductNotFoundException());
       expect(mockRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    describe('checkEnoughStock', () => {
+      const productId = getId;
+      const quantity = Number.MAX_VALUE;
+      const product = buildProduct({ isEnable: true }) as unknown as Product;
+      it('throw an error when stock is not enough', async () => {
+        mockRepository.findOne.mockResolvedValue(product);
+
+        const actual = () => service.checkEnoughStock(productId, quantity);
+
+        expect(actual).rejects.toEqual(new NoEnoughStockException(productId));
+        expect(mockRepository.findOne).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('createLike', () => {
+      const userLikeProduct = {
+        userId: getId,
+        productId: getId,
+      } as UserLikeProduct;
+      it('should create a like on product', async () => {
+        mockRepository.findLike.mockResolvedValueOnce(null);
+        mockRepository.createLike.mockResolvedValueOnce(userLikeProduct);
+
+        const actual = await service.createLike(
+          userLikeProduct.userId,
+          userLikeProduct.productId,
+        );
+
+        expect(actual).toEqual(userLikeProduct);
+        expect(mockRepository.findLike).toHaveBeenCalledTimes(1);
+        expect(mockRepository.createLike).toHaveBeenCalledTimes(1);
+      });
+
+      it('throw an error when user already liked the product', async () => {
+        mockRepository.findLike.mockResolvedValueOnce(
+          userLikeProduct as UserLikeProduct,
+        );
+
+        const actual = () =>
+          service.createLike(userLikeProduct.userId, userLikeProduct.productId);
+
+        expect(actual).rejects.toEqual(new UserAlreadyLikeProductException());
+        expect(mockRepository.findLike).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

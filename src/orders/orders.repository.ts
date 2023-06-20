@@ -1,10 +1,10 @@
 import { PrismaService } from '../database/prisma.service';
 import { Order, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { GenericRepository } from '../shared/repository.interface';
+import { OrderRepository } from '../shared/repository.interface';
 
 @Injectable()
-export default class PrismaOrderRepository implements GenericRepository<Order> {
+export default class PrismaOrderRepository implements OrderRepository {
   constructor(private readonly prisma: PrismaService) {}
   findAll(params: {
     skip?: number;
@@ -47,19 +47,5 @@ export default class PrismaOrderRepository implements GenericRepository<Order> {
         },
       },
     });
-  }
-  create(data: object): Promise<Order> {
-    throw new Error('Method not implemented.');
-  }
-  update(params: {
-    where: Prisma.OrderWhereUniqueInput;
-    data: Prisma.OrderUpdateInput;
-  }): Promise<Order> {
-    const { where, data } = params;
-
-    return this.prisma.order.update({ where, data });
-  }
-  delete(where: object): Promise<Order> {
-    throw new Error('Method not implemented.');
   }
 }

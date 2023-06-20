@@ -11,6 +11,7 @@ const getTitleProducts = faker.commerce.productName;
 const getDescription = faker.commerce.productDescription;
 const getRole = faker.helpers.arrayElement(['CLIENT', 'MANAGER']);
 const getPrice = faker.commerce.price;
+const getUrl = faker.internet.url();
 
 function buildReq({ ...overrides } = {}) {
   const req = { user: buildUserReq(), body: {}, params: {}, ...overrides };
@@ -51,7 +52,6 @@ function buildProduct({ ...overrides } = {}) {
     description: getDescription(),
     stock: getId,
     price: getPrice(),
-    categoryId: getId,
     isEnable: getBoolean,
     ...overrides,
   };
@@ -65,6 +65,49 @@ function buildCategory({ ...overrides } = {}) {
   };
 }
 
+function buildProductInCart({ ...overrides } = {}) {
+  return {
+    id: getId,
+    quantity: getId,
+    subtotal: getPrice(),
+    product: buildProduct({
+      id: getId,
+      category: undefined,
+      images: undefined,
+    }),
+    ...overrides,
+  };
+}
+
+function buildCart({ ...overrides } = {}) {
+  return {
+    id: getId,
+    total: getPrice(),
+    products: [buildProductInCart(), buildProductInCart()],
+    ...overrides,
+  };
+}
+
+function buildOrder({ ...overrides } = {}) {
+  return {
+    id: getId,
+    total: getPrice,
+    productId: undefined,
+    orderDetails: [buildProductInCart(), buildProductInCart()],
+    ...overrides,
+  };
+}
+
+function buildImage({ ...overrides } = {}) {
+  return {
+    id: getId,
+    name: getTitleProducts,
+    url: getUrl,
+    productId: getId,
+    ...overrides,
+  };
+}
+
 export {
   buildReq,
   buildProduct,
@@ -72,6 +115,10 @@ export {
   buildUser,
   buildUserReq,
   buildCategory,
+  buildCart,
+  buildProductInCart,
+  buildOrder,
+  buildImage,
   getBoolean,
   getDescription,
   getEmail,
