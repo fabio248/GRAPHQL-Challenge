@@ -1,5 +1,5 @@
-import { Cart, ProductInCar } from '@prisma/client';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Cart } from '@prisma/client';
+import { Exclude, Expose, Type } from 'class-transformer';
 import ProductInCarResponse from './products-in-car.dto';
 
 export default class CartResponse implements Cart {
@@ -7,7 +7,6 @@ export default class CartResponse implements Cart {
   id: number;
 
   @Expose()
-  @Transform(({ value }) => Number(value.toFixed(2)))
   total: number;
 
   @Exclude()

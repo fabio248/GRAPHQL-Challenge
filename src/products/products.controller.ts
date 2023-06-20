@@ -11,14 +11,16 @@ import {
   Query,
   Res,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
 import { UpdateProductDto } from './dto/request/update-product.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Product } from '@prisma/client';
 import DeleteMessageProduct from './message-response/delete-message.response';
 import RoleGuard from '../auth/strategies/role.guard';
+import { PayloadJwt } from '../types/generic';
 
 @Controller('products')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -68,5 +70,13 @@ export class ProductsController {
     const product: Product = await this.productsService.remove(+postId);
 
     res.send(new DeleteMessageProduct(product.id));
+  }
+
+  @Post('/:productId')
+  @UseGuards(RoleGuard('CLIENT'))
+  createLike(@Req() req: Request, @Param('productId') productId: number) {
+    const user = req.user as PayloadJwt;
+
+    return this.productsService.createLike(+user.sub, productId);
   }
 }

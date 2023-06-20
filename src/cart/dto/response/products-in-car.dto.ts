@@ -1,5 +1,5 @@
 import { Product, ProductInCar } from '@prisma/client';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { ProductResponse } from '../../../products/dto/response/product.dto';
 
 export default class ProductInCarResponse implements ProductInCar {
@@ -10,7 +10,6 @@ export default class ProductInCarResponse implements ProductInCar {
   quantity: number;
 
   @Expose()
-  @Transform(({ value }) => Number(value.toFixed(2)))
   subtotal: number;
 
   @Expose()

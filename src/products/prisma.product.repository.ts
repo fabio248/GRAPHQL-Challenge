@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Product, Prisma } from '@prisma/client';
+import { Product, Prisma, UserLikeProduct } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
-import { GenericRepository } from '../shared/repository.interface';
+import { ProductRepository } from '../shared/repository.interface';
 
 @Injectable()
-export default class PrismaProductRepository
-  implements GenericRepository<Product>
-{
+export default class PrismaProductRepository implements ProductRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(params: {
@@ -62,5 +60,16 @@ export default class PrismaProductRepository
 
   async delete(where: Prisma.ProductWhereUniqueInput): Promise<Product> {
     return this.prisma.product.delete({ where });
+  }
+  async createLike(
+    data: Prisma.UserLikeProductCreateInput,
+  ): Promise<UserLikeProduct> {
+    return this.prisma.userLikeProduct.create({ data });
+  }
+
+  async findLike(userId: number, productId: number) {
+    return this.prisma.userLikeProduct.findUnique({
+      where: { userId_productId: { userId, productId } },
+    });
   }
 }
