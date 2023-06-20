@@ -5,6 +5,7 @@ import OrderResponse from './dto/order-response.dto';
 import { plainToInstance } from 'class-transformer';
 import NoProductsInCarException from './exception/no-product-in-cart.exception';
 import { OrderRepository } from '../shared/repository.interface';
+import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
 
 @Injectable()
 export class OrdersService {
@@ -32,6 +33,9 @@ export class OrdersService {
     }
 
     for (const { product, quantity } of productsInCar) {
+      if (product.stock < quantity) {
+        throw new NoEnoughStockException(product.id);
+      }
       //add all products that have to update stock
       productToUpdateStock.push(
         this.prisma.product.update({
