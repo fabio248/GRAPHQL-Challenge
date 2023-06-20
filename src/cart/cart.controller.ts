@@ -29,13 +29,15 @@ export class CartController {
     return this.cartService.create(userId);
   }
 
-  @Post(':cartId/add-product')
+  @Post('my-cart/add-product')
   @UseGuards(RoleGuard('MANAGER', 'CLIENT'))
   addProduct(
-    @Param('cartId') cartId: number,
+    @Req() req: Request,
     @Body() createProdcutInCar: CreateProductInCarDto,
   ) {
-    return this.productInCarService.create(createProdcutInCar, cartId);
+    const user = req.user as PayloadJwt;
+
+    return this.productInCarService.create(createProdcutInCar, +user.sub);
   }
 
   @Get()

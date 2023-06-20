@@ -60,7 +60,7 @@ describe('ProductInCartService', () => {
   describe('create', () => {
     const cartId = getId;
     it('should create a product in car', async () => {
-      mockCartService.findOneById.mockResolvedValueOnce(cart);
+      mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
       mockProductService.findOneById.mockResolvedValueOnce(product);
       mockProductService.checkEnoughStock.mockResolvedValueOnce();
       mockProductInCarRepo.findOne.mockResolvedValueOnce(null);

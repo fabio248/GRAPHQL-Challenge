@@ -19,8 +19,8 @@ export default class ProductInCartService {
     private readonly productService: ProductsService,
   ) {}
 
-  async create(data: CreateProductInCarDto, cartId: number) {
-    await this.cartService.findOneById(cartId);
+  async create(data: CreateProductInCarDto, userId: number) {
+    const cart = await this.cartService.findOneByUserId(userId);
     const product: ProductResponse = await this.productService.findOneById(
       data.productId,
     );
@@ -28,7 +28,7 @@ export default class ProductInCartService {
     await this.productService.checkEnoughStock(product.id, data.quantity);
 
     const producInCar = await this.isProductAlreadyAddedCart(
-      cartId,
+      cart.id,
       product.id,
     );
 
@@ -41,10 +41,10 @@ export default class ProductInCartService {
     const producInCart = await this.productInCartRepository.create({
       ...data,
       subtotal,
-      cartId,
+      cartId: cart.id,
     });
 
-    await this.cartService.updateTotalAmount(cartId);
+    await this.cartService.updateTotalAmount(cart.id);
 
     return plainToInstance(ProductInCarResponse, producInCart);
   }
@@ -98,7 +98,7 @@ export default class ProductInCartService {
 
   async remove(userId: number, productId: number) {
     const cart = await this.cartService.findOneByUserId(userId);
-    console.log({ cart });
+
     //Check if the product in cart exists
     await this.findOneById(cart.id, productId);
 
