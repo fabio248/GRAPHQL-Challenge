@@ -14,7 +14,7 @@ import {
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
-import JwtAuthenticationGuard from '../auth/strategies/jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { PayloadJwt } from 'src/types/generic';
 
@@ -29,20 +29,20 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   findAll(@Query('skip') skip: number, @Query('take') take: number) {
     return this.usersService.findAll({ skip, take });
   }
 
   @Get('me')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   findOne(@Req() req: Request) {
     const user = req.user as PayloadJwt;
     return this.usersService.findOneById(+user.sub);
   }
 
   @Patch('me')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   update(@Req() req: Request, @Body() updateUserDto: UpdateUserDto) {
     const user = req.user as PayloadJwt;
 
@@ -50,7 +50,7 @@ export class UsersController {
   }
 
   @Delete('me')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   remove(@Req() req: Request) {
     const user = req.user as PayloadJwt;
 

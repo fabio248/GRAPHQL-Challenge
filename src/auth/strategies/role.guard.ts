@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Type, mixin } from '@nestjs/common';
-import JwtAuthenticationGuard from './jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Request } from 'express';
 import { PayloadJwt } from '../../types/generic';
 
 const RoleGuard = (...roles: string[]): Type<CanActivate> => {
-  class RoleGuardMinxin extends JwtAuthenticationGuard {
+  class RoleGuardMinxin extends JwtAuthGuard {
     async canActivate(context: ExecutionContext) {
       await super.canActivate(context);
 

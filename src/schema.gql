@@ -1,0 +1,47 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  """user's id"""
+  id: Int!
+
+  """user's email"""
+  email: String!
+  username: String!
+  role: String!
+}
+
+type AuthResponse {
+  """access token"""
+  accessToken: String!
+
+  """user's information"""
+  user: User!
+}
+
+type Query {
+  sayHelloWorld: String!
+}
+
+type Mutation {
+  """Register a new user"""
+  SignUp(signUpInput: SignUpInput!): AuthResponse!
+
+  """Login user"""
+  SignIn(signInInput: SignInInput!): AuthResponse!
+}
+
+input SignUpInput {
+  email: String!
+  password: String!
+  username: String!
+
+  """user role this can be: CLIENT or MANAGER"""
+  role: String = "CLIENT"
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}

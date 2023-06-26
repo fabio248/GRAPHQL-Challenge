@@ -10,6 +10,7 @@ import { UserResponse } from './dto/response/user-response.dto';
 import * as Jwt from 'jsonwebtoken';
 import EmailAlreadyTakenException from './expections/email-already-taken.expection';
 import UserNotFoundException from './expections/user-not-found.exception';
+import { PayloadJwt } from '../types/generic';
 
 @Injectable()
 export class UserService {
@@ -92,7 +93,7 @@ export class UserService {
     return hashSync(password, 10);
   }
 
-  async createAccessToken(user: UserResponse) {
+  async createAccessToken(user: User) {
     const jwtSecret = this.configService.get('JWT_SECRET');
 
     const payload: Jwt.JwtPayload = this.createPayload(user);
@@ -109,8 +110,8 @@ export class UserService {
     return accessToken;
   }
 
-  private createPayload(user: UserResponse) {
-    const payload: Jwt.JwtPayload = {
+  private createPayload(user: User) {
+    const payload: PayloadJwt = {
       sub: user.id.toString(),
       role: user.role,
     };

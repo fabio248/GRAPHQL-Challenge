@@ -1,6 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { Role } from '../request/create-user.dto';
-import { Cart, Order } from '@prisma/client';
+import { Cart, Order, Role } from '@prisma/client';
 import CartResponse from '../../../cart/dto/response/car-response.dto';
 
 export class UserResponse {

@@ -1,3 +1,4 @@
+import { Field, InputType } from '@nestjs/graphql';
 import { Role } from '@prisma/client';
 import {
   IsEmail,
@@ -7,19 +8,28 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateUserDto {
-  @IsNotEmpty()
+@InputType()
+export class SignUpInput {
+  @Field(() => String)
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
+  @Field(() => String)
   @IsString()
   @IsNotEmpty()
   password: string;
 
+  @Field(() => String)
   @IsString()
   @IsNotEmpty()
   username: string;
 
+  @Field(() => String, {
+    description: 'user role this can be: CLIENT or MANAGER',
+    nullable: true,
+    defaultValue: 'CLIENT',
+  })
   @IsEnum(Role)
   @IsOptional()
   role?: Role;
