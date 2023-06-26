@@ -14,7 +14,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { S3Client } from '@aws-sdk/client-s3';
 
 describe('ImageService', () => {
-  const s3ClientMock = mockClient(S3Client);
+  // const s3ClientMock = mockClient(S3Client);
   let service: ImageService;
   let mockImageRepository: MockContextImageRepo;
   let mockProductService: MockContextProductService;

@@ -10,6 +10,7 @@ import * as Jwt from 'jsonwebtoken';
 import EmailAlreadyTakenException from './expections/email-already-taken.expection';
 import UserNotFoundException from './expections/user-not-found.exception';
 import { PayloadJwt } from '../types/generic';
+import { SignUpInput } from '../auth/dto/input';
 
 @Injectable()
 export class UserService {
@@ -49,7 +50,7 @@ export class UserService {
     return user;
   }
 
-  async create(createUserDto: UpdateUserInput): Promise<UserResponse> {
+  async create(createUserDto: SignUpInput): Promise<UserResponse> {
     const isEmailAlreadyTaken = await this.userRepository.findOne({
       email: createUserDto.email,
     });
@@ -66,7 +67,10 @@ export class UserService {
     return plainToInstance(UserResponse, user);
   }
 
-  update(userId: number, updateUserInput: UpdateUserInput): UserResponse {
+  async update(
+    userId: number,
+    updateUserInput: UpdateUserInput,
+  ): Promise<UserResponse> {
     const { password } = updateUserInput;
 
     const params = {

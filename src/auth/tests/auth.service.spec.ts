@@ -5,7 +5,7 @@ import {
   MockContextUserService,
   createMockUserService,
 } from '../../shared/mocks/users/user.service.mock';
-import { buildUser, getPassword } from '../../shared/generate';
+import { buildUser, getPassword, getToken } from '../../shared/generate';
 import { UserResponse } from '../../users/dto/response/user-response.dto';
 import * as bcrypt from 'bcrypt';
 import AuthUnauthorizedException from '../exception/unauthoried.expection';
@@ -14,6 +14,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let mockUserService: MockContextUserService;
   const user = buildUser() as UserResponse;
+  const accessToken = getToken;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,17 +35,19 @@ describe('AuthService', () => {
 
   describe('signIn', () => {
     const spyCompareSyncBcrypt = jest.spyOn(bcrypt, 'compareSync');
-    it('should return user without sensitive info when credentials are valid', async () => {
+    it('should return user and accessToken when credentials are valid', async () => {
       const passwordMatch = true;
       mockUserService.findOneByEmail.mockResolvedValueOnce(user);
+      mockUserService.createAccessToken.mockResolvedValueOnce(accessToken);
       spyCompareSyncBcrypt.mockReturnValueOnce(passwordMatch);
+      const expected = { user, accessToken };
 
       const actual = await service.singIn({
         email: user.email,
         password: user.password,
       });
 
-      expect(actual).toEqual({ ...user, password: undefined });
+      expect(actual).toEqual(expected);
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
       expect(spyCompareSyncBcrypt).toHaveBeenCalledTimes(1);
       expect(spyCompareSyncBcrypt).toHaveReturnedWith(passwordMatch);

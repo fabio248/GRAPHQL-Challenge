@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Role } from '@prisma/client';
-import AuthForbiddenException from '../exception/forbidden.expeception';
+import AuthForbiddenException from '../exception/forbidden.exception';
 
 export const CurrentUser = createParamDecorator(
   (roles: Role[] = [], context: ExecutionContext) => {

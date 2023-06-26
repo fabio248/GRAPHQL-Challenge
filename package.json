@@ -101,8 +101,15 @@
       "!**/*.d.(t|j)s",
       "!**/*.strategy.(t|j)s",
       "!main.ts",
-      "!**/*.expection.(t|j)s",
-      "!**/*.mock.(t|j)s"
+      "!**/*.exception.(t|j)s",
+      "!**/*.mock.(t|j)s",
+      "!**/*.entity.(t|j)s",
+      "!**/*.input.(t|j)s",
+      "!**/*.types.(t|j)s",
+      "!**/*.decorator.(t|j)s",
+      "!**/*resolver.(t|j)s",
+      "!**/index.(t|j)s",
+      "!**/generate.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",

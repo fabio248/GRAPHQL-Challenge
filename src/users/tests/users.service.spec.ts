@@ -14,11 +14,11 @@ import {
   getToken,
 } from '../../shared/generate';
 import UserNotFoundException from '../expections/user-not-found.exception';
-import { UpdateUserInput } from '../dto/input/create-user.input';
+import { UpdateUserInput } from '../dto/input/update-user.dto';
 import EmailAlreadyTakenException from '../expections/email-already-taken.expection';
-import { UpdateUserDto } from '../dto/input/update-user.dto';
 import * as Jwt from 'jsonwebtoken';
 import { UserResponse } from '../dto/response/user-response.dto';
+import { SignUpInput } from '../../auth/dto/input';
 
 describe('UsersService', () => {
   let service: UserService;
@@ -95,7 +95,7 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValueOnce(null);
       mockUserRepository.create.mockResolvedValueOnce(user);
 
-      const actual = await service.create(user as unknown as UpdateUserInput);
+      const actual = await service.create(user as unknown as SignUpInput);
 
       expect(actual).toEqual({ ...user, password: undefined });
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
@@ -105,7 +105,7 @@ describe('UsersService', () => {
     it('throw an error when email is already taken', async () => {
       mockUserRepository.findOne.mockResolvedValueOnce(user);
 
-      const actual = () => service.create(user as unknown as UpdateUserInput);
+      const actual = () => service.create(user as unknown as SignUpInput);
 
       expect(actual).rejects.toEqual(new EmailAlreadyTakenException());
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
@@ -122,7 +122,10 @@ describe('UsersService', () => {
         password: newPassword,
       });
 
-      const actual = await service.update(id, user as unknown as UpdateUserDto);
+      const actual = await service.update(
+        id,
+        user as unknown as UpdateUserInput,
+      );
 
       expect(actual).toEqual({ ...user, password: undefined });
     });
@@ -132,7 +135,7 @@ describe('UsersService', () => {
       const user = buildUser({ password: undefined }) as User;
       mockUserRepository.update.mockResolvedValueOnce(user);
 
-      const actual = await service.update(id, user as UpdateUserDto);
+      const actual = await service.update(id, user as UpdateUserInput);
 
       expect(actual).toEqual({ ...user, password: undefined });
     });
