@@ -14,9 +14,9 @@ import {
   getToken,
 } from '../../shared/generate';
 import UserNotFoundException from '../expections/user-not-found.exception';
-import { CreateUserDto } from '../dto/request/create-user.dto';
+import { UpdateUserInput } from '../dto/input/create-user.input';
 import EmailAlreadyTakenException from '../expections/email-already-taken.expection';
-import { UpdateUserDto } from '../dto/request/update-user.dto';
+import { UpdateUserDto } from '../dto/input/update-user.dto';
 import * as Jwt from 'jsonwebtoken';
 import { UserResponse } from '../dto/response/user-response.dto';
 
@@ -95,7 +95,7 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValueOnce(null);
       mockUserRepository.create.mockResolvedValueOnce(user);
 
-      const actual = await service.create(user as unknown as CreateUserDto);
+      const actual = await service.create(user as unknown as UpdateUserInput);
 
       expect(actual).toEqual({ ...user, password: undefined });
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
@@ -105,7 +105,7 @@ describe('UsersService', () => {
     it('throw an error when email is already taken', async () => {
       mockUserRepository.findOne.mockResolvedValueOnce(user);
 
-      const actual = () => service.create(user as unknown as CreateUserDto);
+      const actual = () => service.create(user as unknown as UpdateUserInput);
 
       expect(actual).rejects.toEqual(new EmailAlreadyTakenException());
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);

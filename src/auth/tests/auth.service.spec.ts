@@ -5,7 +5,7 @@ import {
   MockContextUserService,
   createMockUserService,
 } from '../../shared/mocks/users/user.service.mock';
-import { buildUser, getPassword, getToken } from '../../shared/generate';
+import { buildUser, getPassword } from '../../shared/generate';
 import { UserResponse } from '../../users/dto/response/user-response.dto';
 import * as bcrypt from 'bcrypt';
 import AuthUnauthorizedException from '../exception/unauthoried.expection';
@@ -39,7 +39,10 @@ describe('AuthService', () => {
       mockUserService.findOneByEmail.mockResolvedValueOnce(user);
       spyCompareSyncBcrypt.mockReturnValueOnce(passwordMatch);
 
-      const actual = await service.singIn(user.email, user.password);
+      const actual = await service.singIn({
+        email: user.email,
+        password: user.password,
+      });
 
       expect(actual).toEqual({ ...user, password: undefined });
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
@@ -52,9 +55,12 @@ describe('AuthService', () => {
       mockUserService.findOneByEmail.mockResolvedValueOnce(null);
       spyCompareSyncBcrypt.mockReturnValueOnce(passwordDoesNotMatch);
 
-      await expect(service.singIn(user.email, user.password)).rejects.toEqual(
-        new AuthUnauthorizedException(),
-      );
+      await expect(
+        service.singIn({
+          email: user.email,
+          password: user.password,
+        }),
+      ).rejects.toEqual(new AuthUnauthorizedException());
 
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
       expect(spyCompareSyncBcrypt).not.toHaveBeenCalled();
@@ -66,25 +72,16 @@ describe('AuthService', () => {
       mockUserService.findOneByEmail.mockResolvedValueOnce(user);
       spyCompareSyncBcrypt.mockReturnValueOnce(passwordDoesNotMatch);
 
-      await expect(service.singIn(user.email, wrongPassword)).rejects.toEqual(
-        new AuthUnauthorizedException(),
-      );
+      await expect(
+        service.singIn({
+          email: user.email,
+          password: wrongPassword,
+        }),
+      ).rejects.toEqual(new AuthUnauthorizedException());
 
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
       expect(spyCompareSyncBcrypt).toHaveBeenCalledTimes(1);
       expect(spyCompareSyncBcrypt).toHaveReturnedWith(passwordDoesNotMatch);
-    });
-  });
-
-  describe('createAccessToken', () => {
-    const token = getToken;
-    it('should return a access token', async () => {
-      mockUserService.createAccessToken.mockResolvedValueOnce(token);
-
-      const actual = await service.createAccessToken(user);
-
-      expect(actual).toEqual(token);
-      expect(mockUserService.createAccessToken).toHaveBeenCalledTimes(1);
     });
   });
 });

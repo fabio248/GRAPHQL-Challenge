@@ -1,7 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/request/create-user.dto';
-import { UpdateUserDto } from './dto/request/update-user.dto';
+import { UpdateUserInput } from './dto/input/update-user.dto';
 import { GenericRepository } from 'src/shared/repository.interface';
 import { User } from '@prisma/client';
 import { hashSync } from 'bcrypt';
@@ -50,7 +49,7 @@ export class UserService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+  async create(createUserDto: UpdateUserInput): Promise<UserResponse> {
     const isEmailAlreadyTaken = await this.userRepository.findOne({
       email: createUserDto.email,
     });
@@ -67,13 +66,13 @@ export class UserService {
     return plainToInstance(UserResponse, user);
   }
 
-  update(userId: number, updateUserDto: UpdateUserDto): UserResponse {
-    const { password } = updateUserDto;
+  update(userId: number, updateUserInput: UpdateUserInput): UserResponse {
+    const { password } = updateUserInput;
 
     const params = {
       where: { id: userId },
       data: {
-        ...updateUserDto,
+        ...updateUserInput,
         password: password ? this.hashPassword(password) : undefined,
       },
     };

@@ -21,15 +21,29 @@ type AuthResponse {
 }
 
 type Query {
+  """user can have access their own info"""
+  getMyInfo: User!
   sayHelloWorld: String!
 }
 
 type Mutation {
+  """user can update their own info"""
+  updateMyInfo(updateUserInput: UpdateUserInput!): User!
+
+  """delete your account"""
+  deleteYourOwnAccount: User!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  username: String
 }
 
 input SignUpInput {
