@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CatalogController } from './category.controller';
 import { DatabaseModule } from 'src/database/database.module';
+import { CategoryResolver } from './category.resolver';
 import PrismaCatalogRepository from './prisma.category.repository';
 
 @Module({
   imports: [DatabaseModule],
-  controllers: [CatalogController],
   providers: [
     { provide: 'CatalogRepository', useClass: PrismaCatalogRepository },
     CategoryService,
+    CategoryResolver,
   ],
 })
 export class CatalogModule {}

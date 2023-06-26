@@ -5,7 +5,7 @@ import {
   createMockCategoryRepo,
 } from '../../shared/mocks/category/category.repository.mock';
 import { buildCategory } from '../../shared/generate';
-import { CreateCatalogDto } from '../dto/request/create-category.dto';
+import { CreateCategoryInput } from '../dto/inputs/create-category.input';
 import { Category } from '@prisma/client';
 import CategoryNotFoundException from '../expection/category-not-found.expection';
 
@@ -35,7 +35,7 @@ describe('CatalogService', () => {
       mockRepository.create.mockResolvedValueOnce(category);
 
       const actual = await service.create(
-        category as unknown as CreateCatalogDto,
+        category as unknown as CreateCategoryInput,
       );
 
       expect(actual).toEqual(category);

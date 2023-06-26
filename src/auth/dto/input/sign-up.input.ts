@@ -1,5 +1,4 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { Role } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -7,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Role } from '../enum/roles.enum';
 
 @InputType()
 export class SignUpInput {
@@ -25,7 +25,7 @@ export class SignUpInput {
   @IsNotEmpty()
   username: string;
 
-  @Field(() => String, {
+  @Field(() => Role, {
     description: 'user role this can be: CLIENT or MANAGER',
     nullable: true,
     defaultValue: 'CLIENT',

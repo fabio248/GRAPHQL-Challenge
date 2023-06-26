@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthResponse } from './dto/types/auth-response.types';
-import { SignInInput, SingUpInput } from './dto/input';
+import { SignInInput, SignUpInput } from './dto/input';
 import { AuthService } from './auth.service';
 
 @Resolver()
@@ -17,7 +17,7 @@ export class AuthResolver {
     description: 'Register a new user',
   })
   async signUp(
-    @Args('signUpInput') singUpInput: SingUpInput,
+    @Args('signUpInput') singUpInput: SignUpInput,
   ): Promise<AuthResponse> {
     return this.authService.signUp(singUpInput);
   }

@@ -1,23 +1,20 @@
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+
 import { Exclude, Expose } from 'class-transformer';
 
-export default class CategoryReponse {
+@ObjectType()
+export default class CategoryEntity {
+  @Field(() => Int)
   @Expose()
   id: number;
 
+  @Field(() => String)
   @Expose()
   name: string;
 
+  @Field(() => String)
   @Expose()
   description: string;
-
-  @Expose()
-  stock: number;
-
-  @Expose()
-  price: number;
-
-  @Expose()
-  catalogId: number;
 
   @Exclude()
   createdAt: Date;

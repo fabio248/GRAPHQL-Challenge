@@ -2,6 +2,22 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CategoryEntity {
+  id: Int!
+  name: String!
+  description: String!
+}
+
+type ProductEntity {
+  id: Int!
+  name: String!
+  description: String!
+  stock: Int!
+  price: Int!
+  categoryId: Int!
+  isEnable: Boolean!
+}
+
 type User {
   """user's id"""
   id: Int!
@@ -24,6 +40,9 @@ type Query {
   """user can have access their own info"""
   getMyInfo: User!
   sayHelloWorld: String!
+
+  """get categories list"""
+  listCategories: [CategoryEntity!]!
 }
 
 type Mutation {
@@ -33,11 +52,17 @@ type Mutation {
   """delete your account"""
   deleteYourOwnAccount: User!
 
+  """Manager can create a new product"""
+  createProduct(createProductInput: CreateProductInput!): ProductEntity!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
+
+  """Manager can create a new category for products"""
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
 }
 
 input UpdateUserInput {
@@ -46,16 +71,35 @@ input UpdateUserInput {
   username: String
 }
 
+input CreateProductInput {
+  name: String!
+  description: String!
+  stock: Int!
+  price: String!
+  categoryId: Int!
+  isEnable: Boolean
+}
+
 input SignUpInput {
   email: String!
   password: String!
   username: String!
 
   """user role this can be: CLIENT or MANAGER"""
-  role: String = "CLIENT"
+  role: Role = CLIENT
+}
+
+enum Role {
+  CLIENT
+  MANAGER
 }
 
 input SignInInput {
   email: String!
   password: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
 }
