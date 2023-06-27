@@ -27,6 +27,7 @@ export default class PrismaProductInCarRepository
       where,
     });
   }
+
   findOne(
     where: Prisma.ProductInCarWhereUniqueInput,
   ): Promise<ProductInCar | null> {

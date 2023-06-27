@@ -28,26 +28,26 @@ export default class ProductInCartService {
 
     await this.productService.checkEnoughStock(product.id, data.quantity);
 
-    const producInCar = await this.isProductAlreadyAddedCart(
+    const alreadyExitsProducInCar = await this.isProductAlreadyAddedCart(
       cart.id,
       product.id,
     );
 
-    if (producInCar) {
-      return this.add(producInCar, data.quantity, product);
+    if (alreadyExitsProducInCar) {
+      return this.add(alreadyExitsProducInCar, data.quantity, product);
     }
 
     const subtotal = data.quantity * product.price;
 
-    const producInCart = await this.productInCartRepository.create({
+    const newProductInCart = this.productInCartRepository.create({
       ...data,
       subtotal,
       cartId: cart.id,
     });
 
-    await this.cartService.updateTotalAmount(cart.id);
+    this.cartService.updateTotalAmount(cart.id);
 
-    return producInCar;
+    return newProductInCart;
   }
 
   private async add(
@@ -73,7 +73,7 @@ export default class ProductInCartService {
     });
 
     await this.cartService.updateTotalAmount(productInCar.cartId);
-    console.log({ updatedProductInCar });
+
     return updatedProductInCar;
   }
 

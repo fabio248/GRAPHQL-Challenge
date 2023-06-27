@@ -1,11 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CartService } from '../cart/services/cart.service';
 import { PrismaService } from '../database/prisma.service';
-import OrderResponse from './dto/order-response.dto';
+import { OrderEntity } from './entities';
 import { plainToInstance } from 'class-transformer';
 import NoProductsInCarException from './exception/no-product-in-cart.exception';
 import { OrderRepository } from '../shared/repository.interface';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
+import { Order } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -83,10 +84,7 @@ export class OrdersService {
         orderDetails: {
           include: {
             product: {
-              select: {
-                name: true,
-                price: true,
-              },
+              include: { category: true },
             },
           },
         },
@@ -100,22 +98,24 @@ export class OrdersService {
       ...productToUpdateStock,
     ]);
 
-    return plainToInstance(OrderResponse, response[POSITION_ORDER]);
+    return response[POSITION_ORDER];
   }
 
   async findAll(skip?: number, take?: number, userId?: number) {
-    const listOrders = await this.orderRepository.findAll({
+    return this.orderRepository.findAll({
       skip,
       take,
       where: { userId },
     });
-
-    return listOrders.map((order) => plainToInstance(OrderResponse, order));
   }
 
-  async findOne(id: number): Promise<OrderResponse> {
+  async findOne(id: number): Promise<Order> {
     const order = await this.orderRepository.findOne({ id });
 
-    return plainToInstance(OrderResponse, order);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
   }
 }

@@ -51,6 +51,21 @@ type AuthResponse {
   user: UserEntiy!
 }
 
+type OrderDetailsEntity {
+  id: Int!
+  quantity: Int!
+  subtotal: String!
+  orderId: Int!
+  product: ProductEntity!
+}
+
+type OrderEntity {
+  id: Int!
+  userId: Int!
+  total: String!
+  orderDetails: [OrderDetailsEntity!]!
+}
+
 type Query {
   """user can have access their own info"""
   getMyInfo: UserEntiy!
@@ -82,6 +97,15 @@ type Query {
 
   """Client can get their own cart and products in cart"""
   getMyCart: CartEntity!
+
+  """Client can see a list of their orders"""
+  getMyOrders: [OrderEntity!]!
+
+  """Manager can get a list of orders client"""
+  getListOrders: [OrderEntity!]!
+
+  """Manager and client can search one order by id"""
+  getOneOrder(orderId: Int!): OrderEntity!
 }
 
 type Mutation {
@@ -122,6 +146,9 @@ type Mutation {
 
   """Client can delete specific product by id"""
   removeProductToMyCart(removeProductInCartInput: RemoveProductInCartInput!): ProductInCarEntity!
+
+  """Client can create a order from products that have on cart"""
+  createOrder: OrderEntity!
 }
 
 input UpdateUserInput {

@@ -5,8 +5,20 @@ import { OrderRepository } from '../shared/repository.interface';
 
 @Injectable()
 export default class PrismaOrderRepository implements OrderRepository {
+  private readonly includedInfo = {
+    user: true,
+    orderDetails: {
+      include: {
+        product: {
+          include: { category: true, images: true },
+        },
+      },
+    },
+  };
+
   constructor(private readonly prisma: PrismaService) {}
-  findAll(params: {
+
+  async findAll(params: {
     skip?: number;
     take?: number;
     where?: Prisma.OrderWhereInput;
@@ -17,35 +29,13 @@ export default class PrismaOrderRepository implements OrderRepository {
       skip: skip || 0,
       take: take || 10,
       where,
-      include: {
-        orderDetails: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                price: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.includedInfo,
     });
   }
-  findOne(where: Prisma.OrderWhereUniqueInput): Promise<Order | null> {
+  async findOne(where: Prisma.OrderWhereUniqueInput): Promise<Order | null> {
     return this.prisma.order.findUnique({
       where,
-      include: {
-        orderDetails: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                price: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.includedInfo,
     });
   }
 }

@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export default class PrismaCartRepository implements GenericRepository<Cart> {
-  private included_info = {
+  private includedInfo = {
     user: true,
     products: { include: { product: { include: { category: true } } } },
   };
@@ -23,19 +23,19 @@ export default class PrismaCartRepository implements GenericRepository<Cart> {
       skip,
       take,
       where,
-      include: this.included_info,
+      include: this.includedInfo,
     });
   }
 
   async findOne(where: Prisma.CartWhereUniqueInput): Promise<Cart | null> {
     return this.prisma.cart.findUnique({
       where,
-      include: this.included_info,
+      include: this.includedInfo,
     });
   }
 
   async create(data: Prisma.CartCreateInput): Promise<Cart> {
-    return this.prisma.cart.create({ data });
+    return this.prisma.cart.create({ data, include: this.includedInfo });
   }
 
   async update(params: {
@@ -47,7 +47,7 @@ export default class PrismaCartRepository implements GenericRepository<Cart> {
     return this.prisma.cart.update({
       where,
       data,
-      include: this.included_info,
+      include: this.includedInfo,
     });
   }
 
