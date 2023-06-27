@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
-
-export class CreateImageDto {
+import { InputType } from '@nestjs/graphql';
+import { IsNotEmpty, IsString } from 'class-validator';
+@InputType()
+export class CreateImageInput {
   @IsNotEmpty()
   @IsString()
   name: string;

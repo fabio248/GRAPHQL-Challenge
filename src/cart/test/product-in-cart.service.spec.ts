@@ -1,4 +1,4 @@
-import { ProductResponse } from './../../products/dto/response/product.dto';
+import { Product } from './../../products/dto/response/product.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   MockContextCartService,
@@ -31,7 +31,7 @@ describe('ProductInCartService', () => {
   let mockProductService: MockContextProductService;
   let mockCartService: MockContextCartService;
   const cart = buildCart({ id: getId }) as unknown as CartResponse;
-  const product = buildProduct() as unknown as ProductResponse;
+  const product = buildProduct() as unknown as Product;
   const productInCart = buildProductInCart() as unknown as ProductInCarResponse;
   const createProductInCart =
     buildProductInCart() as unknown as CreateProductInCarDto;
@@ -76,7 +76,7 @@ describe('ProductInCartService', () => {
     const quantity = Number.MIN_SAFE_INTEGER;
     const product = buildProduct({
       stock: Number.MAX_SAFE_INTEGER,
-    }) as unknown as ProductResponse;
+    }) as unknown as Product;
     it('should add quantity product in cart', async () => {
       mockProductInCarRepo.update.mockResolvedValue(productInCart);
       mockCartService.updateTotalAmount.mockResolvedValueOnce();

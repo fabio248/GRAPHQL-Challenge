@@ -6,8 +6,8 @@ import {
 } from '../../shared/mocks/product/product.repository.mock';
 import { buildProduct, getDescription, getId } from '../../shared/generate';
 import { Product, UserLikeProduct } from '@prisma/client';
-import { CreateProductDto } from '../dto/request/create-product.dto';
-import { UpdateProductDto } from '../dto/request/update-product.dto';
+import { CreateProductInput } from '../dto/inputs/create-product.input';
+import { UpdateProductInput } from '../dto/inputs/update-product.input';
 import ProductNotFoundException from '../exceptions/product-not-found.expection';
 import NoEnoughStockException from '../../cart/expections/no-enough-stock.exception';
 import UserAlreadyLikeProductException from '../exceptions/user-already-liked-product.exception';
@@ -43,7 +43,7 @@ describe('ProductsService', () => {
       mockRepository.create.mockResolvedValueOnce(product);
 
       const actual = await service.create(
-        product as unknown as CreateProductDto,
+        product as unknown as CreateProductInput,
       );
 
       expect(actual).toEqual(product);
@@ -54,15 +54,13 @@ describe('ProductsService', () => {
   describe('findAll', () => {
     const categoryId = getId;
     const disabledProduct = true;
-    const notImages = true;
     it('should return a list of products', async () => {
       const listProduct = [product, product, product];
       mockRepository.findAll.mockResolvedValueOnce(listProduct);
 
       const actual = await service.findAll({
         categoryId,
-        disabledProduct,
-        notImages,
+        embedDisabledProducts: disabledProduct,
       });
 
       expect(actual).toEqual(listProduct);
@@ -97,7 +95,7 @@ describe('ProductsService', () => {
 
       const actual = await service.update(
         product.id,
-        product as unknown as UpdateProductDto,
+        product as unknown as UpdateProductInput,
       );
 
       expect(actual).toEqual(product);
@@ -110,7 +108,7 @@ describe('ProductsService', () => {
       mockRepository.findOne.mockResolvedValueOnce(null);
 
       const actual = () =>
-        service.update(product.id, product as unknown as UpdateProductDto);
+        service.update(product.id, product as unknown as UpdateProductInput);
 
       expect(actual).rejects.toEqual(new ProductNotFoundException());
       expect(mockRepository.findOne).toHaveBeenCalledTimes(1);

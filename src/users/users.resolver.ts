@@ -6,7 +6,7 @@ import { CurrentUser } from '../auth/decoratos/current-user.decorator';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { UserService } from './users.service';
 import { UserResponse } from './dto/response/user-response.dto';
-import { UpdateUserInput } from './dto/input/update-user.dto';
+import { UpdateUserInput } from './dto/input/update-user.input';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)

@@ -13,9 +13,9 @@ type ProductEntity {
   name: String!
   description: String!
   stock: Int!
-  price: Int!
-  categoryId: Int!
+  price: String!
   isEnable: Boolean!
+  category: CategoryEntity!
 }
 
 type User {
@@ -39,6 +39,21 @@ type AuthResponse {
 type Query {
   """user can have access their own info"""
   getMyInfo: User!
+
+  """get a list of products without authentication"""
+  listProducts(
+    """add products that are disable"""
+    embedDisabledProducts: Boolean = false
+
+    """numbers of products to skip"""
+    skip: Int = 0
+
+    """numbers of products to take"""
+    take: Int = 10
+
+    """filter product by category"""
+    categoryId: Int
+  ): [ProductEntity!]!
   sayHelloWorld: String!
 
   """get categories list"""
@@ -77,7 +92,7 @@ input CreateProductInput {
   stock: Int!
   price: String!
   categoryId: Int!
-  isEnable: Boolean
+  isEnable: Boolean = true
 }
 
 input SignUpInput {

@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
-import { UpdateUserInput } from './dto/input/update-user.dto';
+import { UpdateUserInput } from './dto/input/update-user.input';
 import { GenericRepository } from 'src/shared/repository.interface';
 import { User } from '@prisma/client';
 import { hashSync } from 'bcrypt';

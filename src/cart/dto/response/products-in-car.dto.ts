@@ -1,6 +1,6 @@
 import { Product, ProductInCar } from '@prisma/client';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { ProductResponse } from '../../../products/dto/response/product.dto';
+import { ProductEntity } from '../../../products/entities';
 
 export default class ProductInCarResponse implements ProductInCar {
   @Expose()
@@ -13,7 +13,7 @@ export default class ProductInCarResponse implements ProductInCar {
   subtotal: number;
 
   @Expose()
-  @Type(() => ProductResponse)
+  @Type(() => ProductEntity)
   product: Product;
 
   @Exclude()

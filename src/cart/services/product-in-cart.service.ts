@@ -8,7 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import ProductInCarResponse from '../dto/response/products-in-car.dto';
 import NoEnoughStockException from '../expections/no-enough-stock.exception';
 import ProductInCarNotFoundException from '../expections/product-in-cart-not-found.exception';
-import { ProductResponse } from '../../products/dto/response/product.dto';
+import { ProductEntity } from '../../products/entities';
 
 @Injectable()
 export default class ProductInCartService {
@@ -21,7 +21,7 @@ export default class ProductInCartService {
 
   async create(data: CreateProductInCarDto, userId: number) {
     const cart = await this.cartService.findOneByUserId(userId);
-    const product: ProductResponse = await this.productService.findOneById(
+    const product: ProductEntity = await this.productService.findOneById(
       data.productId,
     );
 
@@ -52,7 +52,7 @@ export default class ProductInCartService {
   async add(
     productInCar: ProductInCar,
     quantity: number,
-    product: ProductResponse,
+    product: ProductEntity,
   ): Promise<ProductInCarResponse> {
     const newQuantity = productInCar.quantity + quantity;
     const newsubTotal = productInCar.subtotal + quantity * product.price;

@@ -39,12 +39,7 @@ export default class PrismaProductRepository implements ProductRepository {
     return this.prisma.product.create({
       data,
       include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        category: true,
       },
     });
   }

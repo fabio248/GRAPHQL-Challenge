@@ -14,7 +14,7 @@ import {
   getToken,
 } from '../../shared/generate';
 import UserNotFoundException from '../expections/user-not-found.exception';
-import { UpdateUserInput } from '../dto/input/update-user.dto';
+import { UpdateUserInput } from '../dto/input/update-user.input';
 import EmailAlreadyTakenException from '../expections/email-already-taken.expection';
 import * as Jwt from 'jsonwebtoken';
 import { UserResponse } from '../dto/response/user-response.dto';

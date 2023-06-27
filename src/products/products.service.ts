@@ -1,56 +1,50 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/request/create-product.dto';
-import { UpdateProductDto } from './dto/request/update-product.dto';
+import { UpdateProductInput, CreateProductInput } from './dto/inputs';
 import { ProductRepository } from 'src/shared/repository.interface';
 import { Prisma, Product } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
-import { ProductResponse } from './dto/response/product.dto';
+import { ProductEntity } from './entities';
 import ProductNotFoundException from './exceptions/product-not-found.expection';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
-import UserAlreadyHaveCartException from '../cart/expections/user-already-have-cart.exception';
 import UserAlreadyLikeProductException from './exceptions/user-already-liked-product.exception';
 
 @Injectable()
 export class ProductsService {
   private PRODUCT_IS_ENABLE = true;
+
   constructor(
     @Inject('ProductRepository')
     private readonly productRepository: ProductRepository,
   ) {}
 
-  create(createProductDto: CreateProductDto): ProductResponse {
+  async create(createProductInput: CreateProductInput): Promise<Product> {
     const product = this.productRepository.create({
-      ...createProductDto,
-      price: +createProductDto.price,
+      ...createProductInput,
+      price: +createProductInput.price,
     });
-    return plainToInstance(ProductResponse, product);
+
+    return product;
   }
 
   async findAll(params: {
     skip?: number;
     take?: number;
-    disabledProduct?: boolean;
+    embedDisabledProducts?: boolean;
     categoryId?: number;
-    notImages?: boolean;
-  }): Promise<ProductResponse[]> {
-    const { skip, take, disabledProduct, categoryId, notImages } = params;
+  }): Promise<Product[]> {
+    const { skip, take, embedDisabledProducts, categoryId } = params;
 
     const where: Prisma.ProductWhereInput = {};
     where.OR = [{ isEnable: true }];
 
-    const include: Prisma.ProductInclude = {};
-    include.images = true;
+    const include: Prisma.ProductInclude = { images: true, category: true };
 
     if (categoryId) {
       where.AND = { categoryId };
     }
 
-    if (disabledProduct) {
+    if (embedDisabledProducts) {
       where.OR.push({ isEnable: false });
-    }
-
-    if (notImages) {
-      include.images = false;
     }
 
     const listProduct: Product[] = await this.productRepository.findAll({
@@ -60,12 +54,10 @@ export class ProductsService {
       include,
     });
 
-    return listProduct.map((product) =>
-      plainToInstance(ProductResponse, product),
-    );
+    return listProduct;
   }
 
-  async findOneById(id: number): Promise<ProductResponse> {
+  async findOneById(id: number): Promise<ProductEntity> {
     const product: Product | null = await this.productRepository.findOne({
       id,
     });
@@ -74,21 +66,35 @@ export class ProductsService {
       throw new ProductNotFoundException();
     }
 
-    return plainToInstance(ProductResponse, product);
+    return plainToInstance(ProductEntity, product);
   }
 
   async update(
     id: number,
-    updateProductDto: UpdateProductDto,
-  ): Promise<ProductResponse> {
+    updateProductInput: UpdateProductInput,
+  ): Promise<Product> {
     await this.findOneById(id);
 
     const product = this.productRepository.update({
       where: { id },
-      data: updateProductDto,
+      data: updateProductInput,
     });
 
-    return plainToInstance(ProductResponse, product);
+    return product;
+  }
+
+  async changeProductStatus(productId: number) {
+    const product = await this.productRepository.findOne({ id: productId });
+    const data = { isEnable: this.PRODUCT_IS_ENABLE };
+
+    if (!product) {
+      throw new ProductNotFoundException();
+    }
+    product.isEnable === this.PRODUCT_IS_ENABLE
+      ? (data.isEnable = false)
+      : null;
+
+    return this.productRepository.update({ where: { id: productId }, data });
   }
 
   async remove(id: number): Promise<Product> {
