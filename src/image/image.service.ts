@@ -4,15 +4,25 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import { ImageRepository } from '../shared/repository.interface';
 import { Upload } from '@aws-sdk/lib-storage';
-import { S3, CompleteMultipartUploadCommandOutput } from '@aws-sdk/client-s3';
+import {
+  S3,
+  CompleteMultipartUploadCommandOutput,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
-import ImageReponse from './dto/response/image-response.dto';
+import Image from './dto/response/image-response.dto';
 import NoFileException from './exception/not-file.exception';
 
 @Injectable()
 export class ImageService {
   private s3Client: S3;
+  private readonly region = this.configService.get('aws.region')!;
+  private readonly accessKeyId = this.configService.get<string>('aws.key')!;
+  private readonly secretKey = this.configService.get('aws.secret')!;
+  private readonly bucketName = this.configService.get('aws.bucket')!;
+
   constructor(
     @Inject('ImageRepository')
     private readonly imageRepository: ImageRepository,
@@ -21,10 +31,10 @@ export class ImageService {
   ) {
     this.s3Client = new S3({
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID')!,
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY')!,
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretKey,
       },
-      region: this.configService.get('AWS_REGION'),
+      region: this.region,
     });
   }
 
@@ -40,17 +50,19 @@ export class ImageService {
     const upload = new Upload({
       client: this.s3Client,
       params: {
-        Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME')!,
+        Bucket: this.bucketName,
         Body: buffer,
         Key: name,
         ContentType: mimetype,
         Tagging: 'public=yes',
       },
     });
-    const { Location, Key }: CompleteMultipartUploadCommandOutput =
-      await upload.done();
+    const {
+      Location: url,
+      Key: nameFile,
+    }: CompleteMultipartUploadCommandOutput = await upload.done();
 
-    return { Location, Key };
+    return { url, nameFile };
   }
 
   async create(productId: number, file: Express.Multer.File) {
@@ -58,15 +70,29 @@ export class ImageService {
       productId,
     );
 
-    const { Location, Key } = await this.uploadFile(file, productName);
+    const { url, nameFile } = await this.uploadFile(file, productName);
 
     const image = await this.imageRepository.create({
-      name: Key!,
-      url: Location!,
+      name: url!,
+      url: nameFile!,
       productId,
     });
 
-    return plainToInstance(ImageReponse, image);
+    return plainToInstance(Image, image);
+  }
+
+  async createPresignedUrl(productId: number) {
+    const { name: productName } = await this.productService.findOneById(
+      productId,
+    );
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: `${uuid()}-${productName}.jpg`,
+      ContentType: 'image/jpg',
+      Tagging: 'public=yes',
+    });
+
+    return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
   private getTypeFile(origiName: string): string {

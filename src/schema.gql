@@ -41,7 +41,7 @@ type Query {
   getMyInfo: User!
 
   """get a list of products without authentication"""
-  listProducts(
+  getListProducts(
     """add products that are disable"""
     embedDisabledProducts: Boolean = false
 
@@ -54,6 +54,9 @@ type Query {
     """filter product by category"""
     categoryId: Int
   ): [ProductEntity!]!
+
+  """get one product search by id"""
+  getOneProduct(productId: Int!): ProductEntity!
   sayHelloWorld: String!
 
   """get categories list"""
@@ -70,6 +73,17 @@ type Mutation {
   """Manager can create a new product"""
   createProduct(createProductInput: CreateProductInput!): ProductEntity!
 
+  """Manager can update a product by id"""
+  updateProduct(productId: Int!, updateProductInput: UpdateProductInput!): ProductEntity!
+
+  """
+  Manager can active or desactive a product by id, if the product is active this will be desactive and vice versa
+  """
+  changeProductStatus(productId: Int!): ProductEntity!
+
+  """Manager can delete a product by id"""
+  deleteProduct(productId: Int!): ProductEntity!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
@@ -78,6 +92,9 @@ type Mutation {
 
   """Manager can create a new category for products"""
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+
+  """get url to upload image"""
+  getPresignedUrlS3(productId: Int!): String!
 }
 
 input UpdateUserInput {
@@ -92,6 +109,15 @@ input CreateProductInput {
   stock: Int!
   price: String!
   categoryId: Int!
+  isEnable: Boolean = true
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  stock: Int
+  price: String
+  categoryId: Int
   isEnable: Boolean = true
 }
 
