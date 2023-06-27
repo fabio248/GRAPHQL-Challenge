@@ -16,7 +16,7 @@ export class CategoryResolver {
     name: 'listCategories',
     description: 'get categories list',
   })
-  findAll(@CurrentUser(['MANAGER']) _: JwtPayload) {
+  findAll(@CurrentUser(['MANAGER']) _user: JwtPayload) {
     return this.categoryService.findAll();
   }
 

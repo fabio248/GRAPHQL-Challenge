@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { Cart, Order, Role } from '@prisma/client';
-import CartResponse from '../../../cart/dto/response/car-response.dto';
+import { CartEntity } from '../../../cart/entities';
 
 export class UserResponse {
   @Expose()
@@ -28,7 +28,7 @@ export class UserResponse {
   password: string;
 
   @Expose()
-  @Type(() => CartResponse)
+  @Type(() => CartEntity)
   cart: Cart;
 
   @Exclude()

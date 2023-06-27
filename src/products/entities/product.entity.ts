@@ -1,9 +1,8 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { Category, Image } from '@prisma/client';
-import ImageProductResponse from './image-product-response.dto';
-import CategoryProductResponse from './category-product-response.dto';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import CategoryEntity from '../../category/entity/category.entity';
+import ImageProductResponse from '../dto/response/image-product-response.dto';
 
 @ObjectType()
 export class ProductEntity {
@@ -42,7 +41,5 @@ export class ProductEntity {
   readonly images: Image[];
 
   @Field(() => CategoryEntity)
-  @Expose()
-  @Type(() => CategoryProductResponse)
   readonly category: Category;
 }

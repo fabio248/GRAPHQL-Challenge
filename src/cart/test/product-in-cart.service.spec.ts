@@ -21,20 +21,20 @@ import {
   buildProductInCart,
   getId,
 } from '../../shared/generate';
-import CartResponse from '../dto/response/car-response.dto';
-import ProductInCarResponse from '../dto/response/products-in-car.dto';
-import CreateProductInCarDto from '../dto/request/create-product-in-cat';
+import CartEntity from '../entities/car.entity';
+import ProductInCarEntity from '../entities/products-in-car.entity';
+import CreateProductInCarInput from '../dto/input/create-product-in-cat';
 
 describe('ProductInCartService', () => {
   let service: ProductInCartService;
   let mockProductInCarRepo: MockContextProductInCartRepo;
   let mockProductService: MockContextProductService;
   let mockCartService: MockContextCartService;
-  const cart = buildCart({ id: getId }) as unknown as CartResponse;
+  const cart = buildCart({ id: getId }) as unknown as CartEntity;
   const product = buildProduct() as unknown as Product;
-  const productInCart = buildProductInCart() as unknown as ProductInCarResponse;
+  const productInCart = buildProductInCart() as unknown as ProductInCarEntity;
   const createProductInCart =
-    buildProductInCart() as unknown as CreateProductInCarDto;
+    buildProductInCart() as unknown as CreateProductInCarInput;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -1,5 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { User } from './entities/user.entity';
+import { UserEntiy } from './entities/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decoratos/current-user.decorator';
@@ -13,7 +13,7 @@ import { UpdateUserInput } from './dto/input/update-user.input';
 export class UsersResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User, {
+  @Query(() => UserEntiy, {
     name: 'getMyInfo',
     description: 'user can have access their own info',
   })
@@ -21,7 +21,7 @@ export class UsersResolver {
     return this.userService.findOneById(+user.sub);
   }
 
-  @Mutation(() => User, {
+  @Mutation(() => UserEntiy, {
     name: 'updateMyInfo',
     description: 'user can update their own info',
   })
@@ -32,7 +32,7 @@ export class UsersResolver {
     return this.userService.update(+user.sub, updateUserInput);
   }
 
-  @Mutation(() => User, {
+  @Mutation(() => UserEntiy, {
     name: 'deleteYourOwnAccount',
     description: 'delete your account',
   })

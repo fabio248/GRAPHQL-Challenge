@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type UserEntiy {
+  """user's id"""
+  id: Int!
+
+  """user's email"""
+  email: String!
+  username: String!
+  role: String!
+}
+
+type CartEntity {
+  id: Int!
+  total: String!
+  user: UserEntiy!
+  products: [ProductInCarEntity!]
+}
+
 type CategoryEntity {
   id: Int!
   name: String!
@@ -18,14 +35,12 @@ type ProductEntity {
   category: CategoryEntity!
 }
 
-type User {
-  """user's id"""
-  id: Int!
-
-  """user's email"""
-  email: String!
-  username: String!
-  role: String!
+type ProductInCarEntity {
+  quantity: String!
+  subtotal: String!
+  product: ProductEntity!
+  cartId: Int!
+  productId: Int!
 }
 
 type AuthResponse {
@@ -33,15 +48,15 @@ type AuthResponse {
   accessToken: String!
 
   """user's information"""
-  user: User!
+  user: UserEntiy!
 }
 
 type Query {
   """user can have access their own info"""
-  getMyInfo: User!
+  getMyInfo: UserEntiy!
 
   """get a list of products without authentication"""
-  listProducts(
+  getListProducts(
     """add products that are disable"""
     embedDisabledProducts: Boolean = false
 
@@ -54,21 +69,41 @@ type Query {
     """filter product by category"""
     categoryId: Int
   ): [ProductEntity!]!
+
+  """get one product search by id"""
+  getOneProduct(productId: Int!): ProductEntity!
   sayHelloWorld: String!
 
   """get categories list"""
   listCategories: [CategoryEntity!]!
+
+  """Manager can get a list of all carts"""
+  getListCarts: [CartEntity!]!
+
+  """Client can get their own cart and products in cart"""
+  getMyCart: CartEntity!
 }
 
 type Mutation {
   """user can update their own info"""
-  updateMyInfo(updateUserInput: UpdateUserInput!): User!
+  updateMyInfo(updateUserInput: UpdateUserInput!): UserEntiy!
 
   """delete your account"""
-  deleteYourOwnAccount: User!
+  deleteYourOwnAccount: UserEntiy!
 
   """Manager can create a new product"""
   createProduct(createProductInput: CreateProductInput!): ProductEntity!
+
+  """Manager can update a product by id"""
+  updateProduct(productId: Int!, updateProductInput: UpdateProductInput!): ProductEntity!
+
+  """
+  Manager can active or desactive a product by id, if the product is active this will be desactive and vice versa
+  """
+  changeProductStatus(productId: Int!): ProductEntity!
+
+  """Manager can delete a product by id"""
+  deleteProduct(productId: Int!): ProductEntity!
 
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
@@ -78,6 +113,15 @@ type Mutation {
 
   """Manager can create a new category for products"""
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+
+  """create a cart associated with the authenticated user"""
+  createCart: CartEntity!
+
+  """Client can add product to their cart"""
+  addProductToMyCart(createProductInCar: CreateProductInCarInput!): ProductInCarEntity!
+
+  """Client can delete specific product by id"""
+  removeProductToMyCart(removeProductInCartInput: RemoveProductInCartInput!): ProductInCarEntity!
 }
 
 input UpdateUserInput {
@@ -92,6 +136,15 @@ input CreateProductInput {
   stock: Int!
   price: String!
   categoryId: Int!
+  isEnable: Boolean = true
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  stock: Int
+  price: String
+  categoryId: Int
   isEnable: Boolean = true
 }
 
@@ -117,4 +170,13 @@ input SignInInput {
 input CreateCategoryInput {
   name: String!
   description: String!
+}
+
+input CreateProductInCarInput {
+  quantity: Int!
+  productId: Int!
+}
+
+input RemoveProductInCartInput {
+  productId: Int!
 }
