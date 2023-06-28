@@ -11,7 +11,7 @@ import {
   createMockCartService,
 } from '../../shared/mocks/cart/cart.service.mock';
 import { MockContext, createMockContext } from '../../shared/mocks/prisma.mock';
-import CartEntity from '../../cart/entities/car.entity';
+import { CartEntity } from '../../cart/entities';
 import { buildCart, buildOrder, getId } from '../../shared/generate';
 import NoProductsInCarException from '../exception/no-product-in-cart.exception';
 import { Order } from '@prisma/client';

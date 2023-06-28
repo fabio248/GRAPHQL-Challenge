@@ -32,7 +32,6 @@ type ProductEntity {
   stock: Int!
   price: String!
   isEnable: Boolean!
-  images: Int!
   category: CategoryEntity!
 }
 
@@ -52,6 +51,13 @@ type AuthResponse {
   user: UserEntiy!
 }
 
+type ImageEntity {
+  id: Int!
+  name: String!
+  mimetype: String!
+  url: String!
+}
+
 type OrderDetailsEntity {
   id: Int!
   quantity: Int!
@@ -65,13 +71,6 @@ type OrderEntity {
   userId: Int!
   total: String!
   orderDetails: [OrderDetailsEntity!]!
-}
-
-type ImageEntity {
-  id: Int!
-  name: String!
-  mimetype: String!
-  url: String!
 }
 
 type Query {
@@ -92,13 +91,14 @@ type Query {
     """filter product by category"""
     categoryId: Int
   ): [ProductEntity!]!
-  sayHelloWorld: String!
 
   """get one product search by id"""
   getOneProduct(productId: Int!): ProductEntity!
 
   """get categories list"""
   listCategories: [CategoryEntity!]!
+  sayHelloWorld: String!
+  getLinkImage(imageId: Int!): String!
 
   """Manager can get a list of all carts"""
   getListCarts: [CartEntity!]!
@@ -114,7 +114,6 @@ type Query {
 
   """Manager and client can search one order by id"""
   getOneOrder(orderId: Int!): OrderEntity!
-  getLinkImage(imageId: Int!): String!
 }
 
 type Mutation {
@@ -137,14 +136,18 @@ type Mutation {
 
   """Manager can delete a product by id"""
   deleteProduct(productId: Int!): ProductEntity!
+
+  """Manager can create a new category for products"""
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
 
-  """Manager can create a new category for products"""
-  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+  """Manager can add image to specific product"""
+  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
 
   """create a cart associated with the authenticated user"""
   createCart: CartEntity!
@@ -157,8 +160,6 @@ type Mutation {
 
   """Client can create a order from products that have on cart"""
   createOrder: OrderEntity!
-  """Manager can add image to specific product"""
-  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
 }
 
 input UpdateUserInput {
@@ -183,6 +184,11 @@ input UpdateProductInput {
   price: String
   categoryId: Int
   isEnable: Boolean = true
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
 }
 
 input SignUpInput {

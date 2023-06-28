@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GenericRepository } from '../../shared/repository.interface';
 import { ProductInCar } from '@prisma/client';
-import { CreateProductInCarInput } from '../dto/input/create-product-in-cat';
+import { CreateProductInCarInput } from '../dto/input/create-product-in-cat.input';
 import { CartService } from './cart.service';
 import { ProductsService } from '../../products/products.service';
 import { plainToInstance } from 'class-transformer';

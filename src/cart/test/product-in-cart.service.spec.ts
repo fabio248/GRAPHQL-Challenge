@@ -1,4 +1,3 @@
-import { Product } from './../../products/dto/response/product.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   MockContextCartService,
@@ -21,9 +20,10 @@ import {
   buildProductInCart,
   getId,
 } from '../../shared/generate';
-import CartEntity from '../entities/car.entity';
-import ProductInCarEntity from '../entities/products-in-car.entity';
-import CreateProductInCarInput from '../dto/input/create-product-in-cat';
+import { CartEntity } from '../entities/car.entity';
+import { CreateProductInCarInput } from '../dto/input';
+import { ProductInCar } from '@prisma/client';
+import { ProductEntity } from '../../products/entities';
 
 describe('ProductInCartService', () => {
   let service: ProductInCartService;
@@ -31,8 +31,8 @@ describe('ProductInCartService', () => {
   let mockProductService: MockContextProductService;
   let mockCartService: MockContextCartService;
   const cart = buildCart({ id: getId }) as unknown as CartEntity;
-  const product = buildProduct() as unknown as Product;
-  const productInCart = buildProductInCart() as unknown as ProductInCarEntity;
+  const product = buildProduct() as unknown as ProductEntity;
+  const productInCart = buildProductInCart() as unknown as ProductInCar;
   const createProductInCart =
     buildProductInCart() as unknown as CreateProductInCarInput;
 
@@ -72,21 +72,6 @@ describe('ProductInCartService', () => {
     });
   });
 
-  describe('add', () => {
-    const quantity = Number.MIN_SAFE_INTEGER;
-    const product = buildProduct({
-      stock: Number.MAX_SAFE_INTEGER,
-    }) as unknown as Product;
-    it('should add quantity product in cart', async () => {
-      mockProductInCarRepo.update.mockResolvedValue(productInCart);
-      mockCartService.updateTotalAmount.mockResolvedValueOnce();
-
-      const actual = await service.add(productInCart, quantity, product);
-
-      expect(actual).toEqual(productInCart);
-    });
-  });
-
   describe('findAll', () => {
     it('should return a list of products in car', async () => {
       const listProductsInCar = [productInCart, productInCart, productInCart];
@@ -120,10 +105,9 @@ describe('ProductInCartService', () => {
       mockProductInCarRepo.delete.mockResolvedValueOnce(productInCart);
       mockCartService.decreaseTotalAmount.mockResolvedValueOnce();
 
-      const actual = await service.remove(
-        productInCart.cartId,
-        productInCart.productId,
-      );
+      const actual = await service.remove(productInCart.cartId, {
+        productId: productInCart.productId,
+      });
 
       expect(actual).toEqual(productInCart);
       expect(mockCartService.findOneByUserId).toHaveBeenCalledTimes(1);

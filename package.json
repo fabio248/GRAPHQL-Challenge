@@ -110,7 +110,9 @@
       "!**/*.decorator.(t|j)s",
       "!**/*resolver.(t|j)s",
       "!**/index.(t|j)s",
-      "!**/generate.(t|j)s"
+      "!**/generate.(t|j)s",
+      "!**/*.arg.(t|j)s",
+      "!**/*.enum.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",

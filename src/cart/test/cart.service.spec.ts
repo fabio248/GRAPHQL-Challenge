@@ -14,7 +14,7 @@ import { Cart } from '@prisma/client';
 import UserAlreadyHaveCartException from '../expections/user-already-have-cart.exception';
 import { UserResponse } from '../../users/dto/response/user-response.dto';
 import CartNotFoundException from '../expections/cart-not-found.exception';
-import CartEntity from '../entities/car.entity';
+import { CartEntity } from '../entities/car.entity';
 
 describe('CartService', () => {
   let service: CartService;
@@ -157,12 +157,15 @@ describe('CartService', () => {
 
   describe('decreaseTotalAmount', () => {
     const newTotal = getPrice();
-    const updatedCart = { ...cart, total: newTotal } as unknown as CartEntity;
+    const updatedCart = { ...cart, total: newTotal } as unknown as Cart;
     it('should decrease amount of cart', async () => {
       mockCartRepo.findOne.mockResolvedValue(cart);
       mockCartRepo.update.mockResolvedValueOnce(updatedCart);
 
-      await service.decreaseTotalAmount(cart as CartEntity, +newTotal);
+      await service.decreaseTotalAmount(
+        cart as unknown as CartEntity,
+        +newTotal,
+      );
 
       expect(mockCartRepo.update).toHaveBeenCalled();
     });
@@ -170,12 +173,15 @@ describe('CartService', () => {
 
   describe('replaceTotalAmount', () => {
     const newTotal = getPrice();
-    const updatedCart = { ...cart, total: newTotal } as unknown as CartEntity;
+    const updatedCart = { ...cart, total: newTotal } as unknown as Cart;
     it('should decrease amount of cart', async () => {
       mockCartRepo.findOne.mockResolvedValue(cart);
       mockCartRepo.update.mockResolvedValueOnce(updatedCart);
 
-      await service.decreaseTotalAmount(cart as CartEntity, +newTotal);
+      await service.decreaseTotalAmount(
+        cart as unknown as CartEntity,
+        +newTotal,
+      );
 
       expect(mockCartRepo.update).toHaveBeenCalled();
     });
