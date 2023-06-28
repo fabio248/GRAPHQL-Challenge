@@ -11,5 +11,6 @@ import PrismaCatalogRepository from './prisma.category.repository';
     CategoryService,
     CategoryResolver,
   ],
+  exports: [CategoryService],
 })
-export class CatalogModule {}
+export class CategoryModule {}

@@ -1,5 +1,13 @@
 import { JwtPayload } from './../auth/interfaces/jwt-payload.interface';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { ProductEntity } from './entities';
 import { UseGuards } from '@nestjs/common';
@@ -8,10 +16,14 @@ import { CurrentUser } from '../auth/decoratos/current-user.decorator';
 import { CreateProductInput, UpdateProductInput } from './dto/inputs';
 import { ProductArgs } from './dto/args/product.arg';
 import { Product } from '@prisma/client';
+import { CategoryService } from '../category/category.service';
 
-@Resolver()
+@Resolver(() => ProductEntity)
 export class ProductsResolver {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly categoryService: CategoryService,
+  ) {}
 
   @Query(() => [ProductEntity], {
     name: 'getListProducts',
@@ -77,5 +89,12 @@ export class ProductsResolver {
     @Args('productId', { type: () => Int }) productId: number,
   ) {
     return this.productsService.remove(productId);
+  }
+
+  @ResolveField()
+  async category(@Parent() product: Product) {
+    const { categoryId } = product;
+
+    return this.categoryService.findOneById(categoryId);
   }
 }

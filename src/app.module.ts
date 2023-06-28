@@ -9,7 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { PrismaService } from './database/prisma.service';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
-import { CatalogModule } from './category/category.module';
+import { CategoryModule } from './category/category.module';
 import { ImageModule } from './image/image.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
@@ -32,7 +32,7 @@ import { configuration } from './config';
     UsersModule,
     ProductsModule,
     AuthModule,
-    CatalogModule,
+    CategoryModule,
     ImageModule,
     CartModule,
     OrdersModule,

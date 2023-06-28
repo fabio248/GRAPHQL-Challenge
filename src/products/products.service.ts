@@ -37,7 +37,7 @@ export class ProductsService {
     const where: Prisma.ProductWhereInput = {};
     where.OR = [{ isEnable: true }];
 
-    const include: Prisma.ProductInclude = { images: true, category: true };
+    const include: Prisma.ProductInclude = { images: true };
 
     if (categoryId) {
       where.AND = { categoryId };
