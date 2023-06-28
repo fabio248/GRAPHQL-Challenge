@@ -15,6 +15,7 @@ type ProductEntity {
   stock: Int!
   price: String!
   isEnable: Boolean!
+  images: Int!
   category: CategoryEntity!
 }
 
@@ -34,6 +35,13 @@ type AuthResponse {
 
   """user's information"""
   user: User!
+}
+
+type ImageEntity {
+  id: Int!
+  name: String!
+  mimetype: String!
+  url: String!
 }
 
 type Query {
@@ -57,10 +65,11 @@ type Query {
 
   """get one product search by id"""
   getOneProduct(productId: Int!): ProductEntity!
-  sayHelloWorld: String!
 
   """get categories list"""
   listCategories: [CategoryEntity!]!
+  sayHelloWorld: String!
+  getLinkImage(imageId: Int!): String!
 }
 
 type Mutation {
@@ -84,17 +93,17 @@ type Mutation {
   """Manager can delete a product by id"""
   deleteProduct(productId: Int!): ProductEntity!
 
+  """Manager can create a new category for products"""
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
 
-  """Manager can create a new category for products"""
-  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
-
-  """get url to upload image"""
-  getPresignedUrlS3(productId: Int!): String!
+  """Manager can add image to specific product"""
+  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
 }
 
 input UpdateUserInput {
@@ -121,6 +130,11 @@ input UpdateProductInput {
   isEnable: Boolean = true
 }
 
+input CreateCategoryInput {
+  name: String!
+  description: String!
+}
+
 input SignUpInput {
   email: String!
   password: String!
@@ -140,7 +154,7 @@ input SignInInput {
   password: String!
 }
 
-input CreateCategoryInput {
-  name: String!
-  description: String!
+input CreateImageInput {
+  mimetype: String!
+  productId: Int!
 }

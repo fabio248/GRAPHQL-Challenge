@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
-import Image from '../../image/dto/response/image-response.dto';
+import ImageEntity from '../../image/entities/image.entity';
 
-export default class ImageProductResponse extends Image {
+export default class ImageProductResponse extends ImageEntity {
   @Exclude()
   id: number;
 

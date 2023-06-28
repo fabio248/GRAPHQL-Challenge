@@ -1,17 +1,25 @@
-import { Args, Int, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ImageService } from './image.service';
+import ImageEntity from './entities/image.entity';
+import { CreateImageInput } from './dto/input';
 
 @Resolver()
 export class ImageResolver {
   constructor(private readonly imageService: ImageService) {}
 
-  @Mutation(() => String, {
-    name: 'getPresignedUrlS3',
-    description: 'get url to upload image',
+  @Mutation(() => ImageEntity, {
+    name: 'addImageToProduct',
+    description: 'Manager can add image to specific product',
   })
-  async getPresignedUrl(
-    @Args('productId', { type: () => Int }) productId: number,
+  async addImage(
+    @Args('createImageInput', { type: () => CreateImageInput })
+    createImageInput: CreateImageInput,
   ) {
-    return this.imageService.createPresignedUrl(productId);
+    return this.imageService.create(createImageInput);
+  }
+
+  @Query(() => String, { name: 'getLinkImage' })
+  getLink(@Args('imageId', { type: () => Int }) imageId: number) {
+    return this.imageService.generateLinkToGetImage(imageId);
   }
 }

@@ -7,6 +7,10 @@ import { Injectable } from '@nestjs/common';
 export default class PrismaImageRepository implements ImageRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findAllByProductId(productId: number): Promise<Image[]> {
+    return this.prisma.image.findMany({ where: { productId } });
+  }
+
   async create(data: Prisma.ImageUncheckedCreateInput): Promise<Image> {
     return this.prisma.image.create({ data });
   }
