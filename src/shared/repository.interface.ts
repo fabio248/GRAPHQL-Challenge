@@ -23,6 +23,7 @@ export interface ImageRepository {
 export interface ProductRepository extends GenericRepository<Product> {
   createLike(data: object): Promise<UserLikeProduct>;
   findLike(userId: number, productId: number): Promise<UserLikeProduct | null>;
+  deleteLike(where: object): Promise<UserLikeProduct>;
 }
 
 export interface OrderRepository {

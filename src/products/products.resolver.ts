@@ -18,6 +18,7 @@ import { ProductArgs } from './dto/args/product.arg';
 import { Product } from '@prisma/client';
 import { CategoryService } from '../category/category.service';
 import { ImageService } from '../image/image.service';
+import { UserLikeProductEntity } from './entities/user-like-product.entity';
 
 @Resolver(() => ProductEntity)
 export class ProductsResolver {
@@ -92,6 +93,24 @@ export class ProductsResolver {
     @Args('productId', { type: () => Int }) productId: number,
   ) {
     return this.productsService.remove(productId);
+  }
+
+  @Mutation(() => UserLikeProductEntity, {
+    name: 'createLikeToProduct',
+    description:
+      'Client can like or unlike a product, if the user already liked a product this will be unliked',
+  })
+  @UseGuards(JwtAuthGuard)
+  async createLikeProduct(
+    @CurrentUser(['CLIENT', 'MANAGER']) user: JwtPayload,
+    @Args('productId', { type: () => Int }) productId: number,
+  ) {
+    const response = this.productsService.createLike(
+      +user.sub,
+      productId,
+    );
+
+    return response;
   }
 
   @ResolveField()

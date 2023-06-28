@@ -60,4 +60,12 @@ export default class PrismaProductRepository implements ProductRepository {
       where: { userId_productId: { userId, productId } },
     });
   }
+
+  deleteLike(
+    where: Prisma.UserLikeProductWhereUniqueInput,
+  ): Promise<UserLikeProduct> {
+    return this.prisma.userLikeProduct.delete({
+      where,
+    });
+  }
 }

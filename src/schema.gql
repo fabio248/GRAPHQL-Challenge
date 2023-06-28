@@ -51,6 +51,12 @@ type ProductInCarEntity {
   productId: Int!
 }
 
+type UserLikeProductEntity {
+  productId: Int!
+  userId: Int!
+  type: String!
+}
+
 type AuthResponse {
   """access token"""
   accessToken: String!
@@ -136,6 +142,11 @@ type Mutation {
 
   """Manager can delete a product by id"""
   deleteProduct(productId: Int!): ProductEntity!
+
+  """
+  Client can like or unlike a product, if the user already liked a product this will be unliked
+  """
+  createLikeToProduct(productId: Int!): UserLikeProductEntity!
 
   """Manager can create a new category for products"""
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!

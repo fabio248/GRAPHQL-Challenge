@@ -1,12 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UpdateProductInput, CreateProductInput } from './dto/inputs';
 import { ProductRepository } from 'src/shared/repository.interface';
-import { Prisma, Product } from '@prisma/client';
+import { Prisma, Product, UserLikeProduct } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { ProductEntity } from './entities';
 import ProductNotFoundException from './exceptions/product-not-found.expection';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
-import UserAlreadyLikeProductException from './exceptions/user-already-liked-product.exception';
 
 @Injectable()
 export class ProductsService {
@@ -112,11 +111,19 @@ export class ProductsService {
       userId,
       productId,
     );
+    let query;
+    let type;
 
     if (userLikeProduct) {
-      throw new UserAlreadyLikeProductException();
+      query = await this.productRepository.deleteLike({
+        userId_productId: { userId, productId },
+      });
+      type = 'unliked';
+    } else {
+      query = await this.productRepository.createLike({ userId, productId });
+      type = 'like';
     }
 
-    return this.productRepository.createLike({ userId, productId });
+    return { type, ...query };
   }
 }
