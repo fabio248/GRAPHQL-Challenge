@@ -32,6 +32,7 @@ type ProductEntity {
   stock: Int!
   price: String!
   isEnable: Boolean!
+  images: Int!
   category: CategoryEntity!
 }
 
@@ -66,6 +67,13 @@ type OrderEntity {
   orderDetails: [OrderDetailsEntity!]!
 }
 
+type ImageEntity {
+  id: Int!
+  name: String!
+  mimetype: String!
+  url: String!
+}
+
 type Query {
   """user can have access their own info"""
   getMyInfo: UserEntiy!
@@ -84,10 +92,10 @@ type Query {
     """filter product by category"""
     categoryId: Int
   ): [ProductEntity!]!
+  sayHelloWorld: String!
 
   """get one product search by id"""
   getOneProduct(productId: Int!): ProductEntity!
-  sayHelloWorld: String!
 
   """get categories list"""
   listCategories: [CategoryEntity!]!
@@ -106,6 +114,7 @@ type Query {
 
   """Manager and client can search one order by id"""
   getOneOrder(orderId: Int!): OrderEntity!
+  getLinkImage(imageId: Int!): String!
 }
 
 type Mutation {
@@ -128,7 +137,6 @@ type Mutation {
 
   """Manager can delete a product by id"""
   deleteProduct(productId: Int!): ProductEntity!
-
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
@@ -149,6 +157,8 @@ type Mutation {
 
   """Client can create a order from products that have on cart"""
   createOrder: OrderEntity!
+  """Manager can add image to specific product"""
+  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
 }
 
 input UpdateUserInput {
@@ -194,9 +204,9 @@ input SignInInput {
   password: String!
 }
 
-input CreateCategoryInput {
-  name: String!
-  description: String!
+input CreateImageInput {
+  mimetype: String!
+  productId: Int!
 }
 
 input CreateProductInCarInput {

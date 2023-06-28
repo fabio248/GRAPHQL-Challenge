@@ -14,7 +14,7 @@ import ProductInCartService from '../services/product-in-cart.service';
 import {
   MockContextProductInCartRepo,
   createMockProductInCartRepo,
-} from '../../shared/mocks/cart/product-in-car.repository';
+} from '../../shared/mocks/cart/product-in-car.repository.mock';
 import {
   buildCart,
   buildProduct,
