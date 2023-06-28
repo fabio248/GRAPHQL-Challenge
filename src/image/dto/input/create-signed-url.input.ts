@@ -1,13 +1,12 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsNotEmpty, IsPositive, Matches } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsEnum, IsNotEmpty, IsPositive } from 'class-validator';
+import { mimeType } from '../enum/mimetype.enum';
 
 @InputType()
 export class CreateSignedUrlInput {
-  @Field(() => String)
+  @Field(() => mimeType)
   @IsNotEmpty()
-  @Matches(/^image\/(jpg|jpeg|png)$/, {
-    message: "should be 'image/jpg', 'image/png', 'image/jpeg'",
-  })
+  @IsEnum(mimeType)
   mimetype: string;
 
   @Field(() => String)
