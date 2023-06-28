@@ -25,6 +25,13 @@ type CategoryEntity {
   description: String!
 }
 
+type ImageEntity {
+  id: Int!
+  name: String!
+  mimetype: String!
+  url: String!
+}
+
 type ProductEntity {
   id: Int!
   name: String!
@@ -33,6 +40,7 @@ type ProductEntity {
   price: String!
   isEnable: Boolean!
   category: CategoryEntity!
+  images: [ImageEntity!]!
 }
 
 type ProductInCarEntity {
@@ -49,13 +57,6 @@ type AuthResponse {
 
   """user's information"""
   user: UserEntiy!
-}
-
-type ImageEntity {
-  id: Int!
-  name: String!
-  mimetype: String!
-  url: String!
 }
 
 type OrderDetailsEntity {
@@ -98,7 +99,6 @@ type Query {
   """get categories list"""
   listCategories: [CategoryEntity!]!
   sayHelloWorld: String!
-  getLinkImage(imageId: Int!): String!
 
   """Manager can get a list of all carts"""
   getListCarts: [CartEntity!]!
@@ -140,14 +140,14 @@ type Mutation {
   """Manager can create a new category for products"""
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
 
+  """Manager can add image to specific product"""
+  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
+
   """Register a new user"""
   SignUp(signUpInput: SignUpInput!): AuthResponse!
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
-
-  """Manager can add image to specific product"""
-  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
 
   """create a cart associated with the authenticated user"""
   createCart: CartEntity!
@@ -191,6 +191,17 @@ input CreateCategoryInput {
   description: String!
 }
 
+input CreateImageInput {
+  mimetype: mimeType!
+  productId: Int!
+}
+
+enum mimeType {
+  jpg
+  png
+  jpge
+}
+
 input SignUpInput {
   email: String!
   password: String!
@@ -208,11 +219,6 @@ enum Role {
 input SignInInput {
   email: String!
   password: String!
-}
-
-input CreateImageInput {
-  mimetype: String!
-  productId: Int!
 }
 
 input CreateProductInCarInput {

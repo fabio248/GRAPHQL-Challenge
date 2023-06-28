@@ -28,7 +28,7 @@ export class SignUpInput {
   @Field(() => Role, {
     description: 'user role this can be: CLIENT or MANAGER',
     nullable: true,
-    defaultValue: 'CLIENT',
+    defaultValue: Role.CLIENT,
   })
   @IsEnum(Role)
   @IsOptional()

@@ -28,19 +28,12 @@ export default class PrismaProductRepository implements ProductRepository {
   ): Promise<Product | null> {
     return this.prisma.product.findUnique({
       where,
-      include: {
-        category: true,
-        images: true,
-      },
     });
   }
 
   async create(data: Prisma.ProductCreateInput): Promise<Product> {
     return this.prisma.product.create({
       data,
-      include: {
-        category: true,
-      },
     });
   }
 

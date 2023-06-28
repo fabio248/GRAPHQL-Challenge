@@ -1,4 +1,3 @@
-import { JwtPayload } from './../auth/interfaces/jwt-payload.interface';
 import {
   Args,
   Int,
@@ -8,19 +7,23 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { Inject, UseGuards, forwardRef } from '@nestjs/common';
+import { JwtPayload } from './../auth/interfaces/jwt-payload.interface';
 import { ProductsService } from './products.service';
 import { ProductEntity } from './entities';
-import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decoratos/current-user.decorator';
 import { CreateProductInput, UpdateProductInput } from './dto/inputs';
 import { ProductArgs } from './dto/args/product.arg';
 import { Product } from '@prisma/client';
 import { CategoryService } from '../category/category.service';
+import { ImageService } from '../image/image.service';
 
 @Resolver(() => ProductEntity)
 export class ProductsResolver {
   constructor(
+    @Inject(forwardRef(() => ImageService))
+    private readonly imageService: ImageService,
     private readonly productsService: ProductsService,
     private readonly categoryService: CategoryService,
   ) {}
@@ -96,5 +99,12 @@ export class ProductsResolver {
     const { categoryId } = product;
 
     return this.categoryService.findOneById(categoryId);
+  }
+
+  @ResolveField()
+  async images(@Parent() product: Product) {
+    const { id } = product;
+
+    return this.imageService.getImagesByProductId(id);
   }
 }

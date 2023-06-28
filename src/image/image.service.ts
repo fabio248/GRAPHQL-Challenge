@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import { ImageRepository } from '../shared/repository.interface';
@@ -21,8 +21,9 @@ export class ImageService {
   constructor(
     @Inject('ImageRepository')
     private readonly imageRepository: ImageRepository,
-    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => ProductsService))
     private readonly productService: ProductsService,
+    private readonly configService: ConfigService,
   ) {
     this.s3Client = new S3({
       credentials: {
@@ -52,7 +53,7 @@ export class ImageService {
 
     const fileName = `${uuid()}-${productName}.${mimetype.split('/')[1]}`;
 
-    const url = this.createPresignedUrl(fileName, mimetype);
+    const url = this.createUrlToUploadImage(fileName, mimetype);
 
     const image = await this.imageRepository.create({
       name: fileName,
@@ -65,7 +66,7 @@ export class ImageService {
     return response;
   }
 
-  async createPresignedUrl(fileName: string, mimetype: string) {
+  async createUrlToUploadImage(fileName: string, mimetype: string) {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: fileName,
@@ -75,30 +76,18 @@ export class ImageService {
     return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
-  private getTypeFile(origiName: string): string {
-    const fileType = origiName.split('.');
-    //get the type of file example .png .jpg
-    return `${fileType[fileType.length - 1]}`;
-  }
-
-  async generateLinksImageSpecificProduct(producId: number) {
-    const imagesLinks = [];
+  async getImagesByProductId(producId: number) {
+    const response = [];
     const images = await this.imageRepository.findAllByProductId(producId);
 
     for (const image of images) {
-      imagesLinks.push(await this.generateLink(image.name));
+      response.push({ ...image, url: this.generateUrlS3Image(image.name) });
     }
 
-    return imagesLinks;
+    return response;
   }
 
-  async generateLinkToGetImage(imageId: number): Promise<string> {
-    const { name } = await this.findOne(imageId);
-
-    return this.generateLink(name);
-  }
-
-  async generateLink(key: string) {
+  async generateUrlS3Image(key: string) {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,

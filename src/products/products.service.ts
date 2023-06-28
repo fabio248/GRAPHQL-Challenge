@@ -37,8 +37,6 @@ export class ProductsService {
     const where: Prisma.ProductWhereInput = {};
     where.OR = [{ isEnable: true }];
 
-    const include: Prisma.ProductInclude = { images: true };
-
     if (categoryId) {
       where.AND = { categoryId };
     }
@@ -51,7 +49,6 @@ export class ProductsService {
       skip,
       take,
       where,
-      include,
     });
 
     return listProduct;

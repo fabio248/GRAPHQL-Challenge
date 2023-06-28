@@ -1,3 +1,4 @@
+import { mimeType } from './../../../image/dto/enum/mimetype.enum';
 import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsBoolean,

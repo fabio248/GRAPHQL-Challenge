@@ -1,6 +1,7 @@
 import { Category, Image } from '@prisma/client';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import CategoryEntity from '../../category/entity/category.entity';
+import ImageEntity from '../../image/entities/image.entity';
 
 @ObjectType()
 export class ProductEntity {
@@ -25,5 +26,6 @@ export class ProductEntity {
   @Field(() => CategoryEntity)
   readonly category: Category;
 
+  @Field(() => [ImageEntity])
   readonly images: Image[];
 }

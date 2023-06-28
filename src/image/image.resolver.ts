@@ -17,9 +17,4 @@ export class ImageResolver {
   ) {
     return this.imageService.create(createImageInput);
   }
-
-  @Query(() => String, { name: 'getLinkImage' })
-  getLink(@Args('imageId', { type: () => Int }) imageId: number) {
-    return this.imageService.generateLinkToGetImage(imageId);
-  }
 }
