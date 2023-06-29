@@ -65,6 +65,10 @@ type AuthResponse {
   user: UserEntiy!
 }
 
+type RecoveryPasswordResponse {
+  message: String!
+}
+
 type OrderDetailsEntity {
   id: Int!
   quantity: Int!
@@ -104,7 +108,7 @@ type Query {
 
   """get categories list"""
   listCategories: [CategoryEntity!]!
-  sayHelloWorld: String!
+  sendMail: String!
 
   """Manager can get a list of all carts"""
   getListCarts: [CartEntity!]!
@@ -159,6 +163,8 @@ type Mutation {
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
+  sendRecoveryPasswordMail(email: String!): RecoveryPasswordResponse!
+  changePassword(changePasswordInput: ChangePasswordInput!): RecoveryPasswordResponse!
 
   """create a cart associated with the authenticated user"""
   createCart: CartEntity!
@@ -230,6 +236,11 @@ enum Role {
 input SignInInput {
   email: String!
   password: String!
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  recoveryToken: String!
 }
 
 input CreateProductInCarInput {

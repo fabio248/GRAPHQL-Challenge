@@ -6,15 +6,17 @@ export class UpdateUserInput {
   @Field(() => String, { nullable: true })
   @IsEmail()
   @IsOptional()
-  email: string;
+  readonly email?: string;
 
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  password: string;
+  readonly password?: string;
 
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  username: string;
+  readonly username?: string;
+
+  readonly recoveryToken?: string | null;
 }

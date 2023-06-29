@@ -34,14 +34,14 @@ export class UserService {
     return listUser.map((user) => plainToInstance(UserResponse, user));
   }
 
-  async findOneById(userId: number): Promise<UserResponse> {
+  async findOneById(userId: number): Promise<User> {
     const user: User | null = await this.userRepository.findOne({ id: userId });
 
     if (!user) {
       throw new UserNotFoundException();
     }
 
-    return plainToInstance(UserResponse, user);
+    return user;
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -50,7 +50,7 @@ export class UserService {
     return user;
   }
 
-  async create(createUserDto: SignUpInput): Promise<UserResponse> {
+  async create(createUserDto: SignUpInput): Promise<User> {
     const isEmailAlreadyTaken = await this.userRepository.findOne({
       email: createUserDto.email,
     });
@@ -64,13 +64,13 @@ export class UserService {
       password: this.hashPassword(createUserDto.password),
     });
 
-    return plainToInstance(UserResponse, user);
+    return user;
   }
 
   async update(
     userId: number,
     updateUserInput: UpdateUserInput,
-  ): Promise<UserResponse> {
+  ): Promise<User> {
     const { password } = updateUserInput;
 
     const params = {
@@ -82,7 +82,7 @@ export class UserService {
     };
     const updatedUser = this.userRepository.update(params);
 
-    return plainToInstance(UserResponse, updatedUser);
+    return updatedUser;
   }
 
   async remove(userId: number): Promise<UserResponse> {
@@ -111,6 +111,19 @@ export class UserService {
     await this.userRepository.update(params);
 
     return accessToken;
+  }
+
+  async isValidRecoveryToken(
+    userId: number,
+    recoveryToken: string,
+  ): Promise<boolean> {
+    const user = await this.findOneById(userId);
+
+    if (user.recoveryToken !== recoveryToken) {
+      return false;
+    }
+
+    return true;
   }
 
   private createPayload(user: User) {

@@ -1,16 +1,11 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthResponse } from './dto/types/auth-response.types';
-import { SignInInput, SignUpInput } from './dto/input';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { AuthResponse, MailResponse } from './dto/types';
+import { ChangePasswordInput, SignInInput, SignUpInput } from './dto/input';
 import { AuthService } from './auth.service';
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
-
-  @Query(() => String)
-  sayHelloWorld(): string {
-    return 'hello world';
-  }
 
   @Mutation(() => AuthResponse, {
     name: 'SignUp',
@@ -27,5 +22,21 @@ export class AuthResolver {
     @Args('signInInput') signInInput: SignInInput,
   ): Promise<AuthResponse> {
     return this.authService.singIn(signInInput);
+  }
+
+  @Mutation(() => MailResponse, {
+    name: 'sendRecoveryPasswordMail',
+  })
+  sendEmail(@Args('email', { type: () => String }) email: string) {
+    return this.authService.sendRecoveryEmail(email);
+  }
+
+  @Mutation(() => MailResponse, {
+    name: 'changePassword',
+  })
+  changePassword(
+    @Args('changePasswordInput') changePasswordInput: ChangePasswordInput,
+  ) {
+    return this.authService.changePassword(changePasswordInput);
   }
 }

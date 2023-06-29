@@ -14,6 +14,7 @@ import { ImageModule } from './image/image.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import { configuration } from './config';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { configuration } from './config';
     ImageModule,
     CartModule,
     OrdersModule,
+    MailerModule,
   ],
   controllers: [],
   providers: [PrismaService],
