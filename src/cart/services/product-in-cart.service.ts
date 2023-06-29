@@ -39,7 +39,7 @@ export default class ProductInCartService {
 
     const subtotal = data.quantity * product.price;
 
-    const newProductInCart = this.productInCartRepository.create({
+    const newProductInCart = await this.productInCartRepository.create({
       ...data,
       subtotal,
       cartId: cart.id,

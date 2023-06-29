@@ -61,11 +61,18 @@ export default class PrismaProductRepository implements ProductRepository {
     });
   }
 
-  deleteLike(
+  async deleteLike(
     where: Prisma.UserLikeProductWhereUniqueInput,
   ): Promise<UserLikeProduct> {
     return this.prisma.userLikeProduct.delete({
       where,
+    });
+  }
+
+  async findLastLike(productId: number): Promise<UserLikeProduct | null> {
+    return this.prisma.userLikeProduct.findFirst({
+      where: { productId },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

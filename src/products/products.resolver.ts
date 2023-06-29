@@ -105,10 +105,7 @@ export class ProductsResolver {
     @CurrentUser(['CLIENT', 'MANAGER']) user: JwtPayload,
     @Args('productId', { type: () => Int }) productId: number,
   ) {
-    const response = this.productsService.createLike(
-      +user.sub,
-      productId,
-    );
+    const response = this.productsService.createLike(+user.sub, productId);
 
     return response;
   }

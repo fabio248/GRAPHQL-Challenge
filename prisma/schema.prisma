@@ -87,7 +87,7 @@ model UserLikeProduct {
   userId        Int        @map("user_id")
 
   @@id([userId,productId])
-  @@map("user_like_post")
+  @@map("user_like_product")
 }
 
 model Cart {

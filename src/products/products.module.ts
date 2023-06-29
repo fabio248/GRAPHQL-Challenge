@@ -5,9 +5,17 @@ import { ProductsResolver } from './products.resolver';
 import PrismaProductRepository from './prisma.product.repository';
 import { CategoryModule } from '../category/category.module';
 import { ImageModule } from '../image/image.module';
+import { MailerModule } from '../mailer/mailer.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [DatabaseModule, CategoryModule, forwardRef(() => ImageModule)],
+  imports: [
+    DatabaseModule,
+    CategoryModule,
+    MailerModule,
+    UsersModule,
+    forwardRef(() => ImageModule),
+  ],
   providers: [
     { provide: 'ProductRepository', useClass: PrismaProductRepository },
     ProductsService,

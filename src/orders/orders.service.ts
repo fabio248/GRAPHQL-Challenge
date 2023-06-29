@@ -1,12 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CartService } from '../cart/services/cart.service';
 import { PrismaService } from '../database/prisma.service';
-import { OrderEntity } from './entities';
-import { plainToInstance } from 'class-transformer';
 import NoProductsInCarException from './exception/no-product-in-cart.exception';
 import { OrderRepository } from '../shared/repository.interface';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
 import { Order } from '@prisma/client';
+import { ProductsService } from '../products/products.service';
+import { ProductInCarEntity } from '../cart/entities';
 
 @Injectable()
 export class OrdersService {
@@ -15,6 +15,7 @@ export class OrdersService {
     private readonly orderRepository: OrderRepository,
     private readonly cartService: CartService,
     private readonly prisma: PrismaService,
+    private readonly productService: ProductsService,
   ) {}
 
   async create(userId: number) {
@@ -37,6 +38,7 @@ export class OrdersService {
       if (product.stock < quantity) {
         throw new NoEnoughStockException(product.id);
       }
+
       //add all products that have to update stock
       productToUpdateStock.push(
         this.prisma.product.update({
@@ -98,6 +100,8 @@ export class OrdersService {
       ...productToUpdateStock,
     ]);
 
+    this.invoke(productsInCar);
+
     return response[POSITION_ORDER];
   }
 
@@ -117,5 +121,11 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  invoke(productsInCart: ProductInCarEntity[]) {
+    productsInCart.forEach((product) => {
+      this.productService.checkStockLessThan3(product.productId);
+    });
   }
 }

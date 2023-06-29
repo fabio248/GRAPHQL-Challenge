@@ -1,11 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { UpdateProductInput, CreateProductInput } from './dto/inputs';
 import { ProductRepository } from 'src/shared/repository.interface';
-import { Prisma, Product, UserLikeProduct } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { ProductEntity } from './entities';
 import ProductNotFoundException from './exceptions/product-not-found.expection';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
+import { MailerService } from '../mailer/mailer.service';
+import { getNotifyLowStockMail } from './utils/notify-low-stock.mail';
+import { UserService } from '../users/users.service';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class ProductsService {
@@ -14,6 +18,10 @@ export class ProductsService {
   constructor(
     @Inject('ProductRepository')
     private readonly productRepository: ProductRepository,
+    @Inject(forwardRef(() => ImageService))
+    private readonly imageService: ImageService,
+    private readonly mailerService: MailerService,
+    private readonly userService: UserService,
   ) {}
 
   async create(createProductInput: CreateProductInput): Promise<Product> {
@@ -107,12 +115,15 @@ export class ProductsService {
   }
 
   async createLike(userId: number, productId: number) {
+    let query;
+    let type;
+
+    await this.findOneById(productId);
+
     const userLikeProduct = await this.productRepository.findLike(
       userId,
       productId,
     );
-    let query;
-    let type;
 
     if (userLikeProduct) {
       query = await this.productRepository.deleteLike({
@@ -125,5 +136,44 @@ export class ProductsService {
     }
 
     return { type, ...query };
+  }
+
+  async sendEmailLowStock(userId: number, productId: number): Promise<void> {
+    const { username, email } = await this.userService.findOneById(userId);
+
+    const images = await this.imageService.getImagesByProductId(productId);
+    const { name: productName } = await this.findOneById(productId);
+
+    const imagesUrl = [];
+
+    for (const img of images) {
+      imagesUrl.push(await img.url);
+    }
+
+    const mail = getNotifyLowStockMail(username, [
+      { name: productName, url: imagesUrl },
+    ]);
+
+    this.mailerService.sendMail({
+      to: email,
+      subject: 'Low Stock Alert',
+      html: mail,
+    });
+  }
+
+  async checkStockLessThan3(productId: number) {
+    const lastUserLikeProduct = await this.productRepository.findLastLike(
+      productId,
+    );
+
+    if (!lastUserLikeProduct) {
+      return null;
+    }
+
+    const { stock } = await this.findOneById(productId);
+
+    if (stock <= 3) {
+      this.sendEmailLowStock(lastUserLikeProduct.userId, productId);
+    }
   }
 }

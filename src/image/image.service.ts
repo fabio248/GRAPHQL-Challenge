@@ -7,7 +7,7 @@ import { S3, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ProductsService } from '../products/products.service';
 import { CreateImageInput } from './dto/input/';
-import { ImageNotFoundException } from './exception/image-not-found.exception';
+import { ImageNotFoundException } from './exception/image-not-found.expection';
 
 @Injectable()
 export class ImageService {
