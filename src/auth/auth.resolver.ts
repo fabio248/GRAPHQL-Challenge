@@ -1,6 +1,11 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthResponse, MailResponse } from './dto/types';
-import { ChangePasswordInput, SignInInput, SignUpInput } from './dto/input';
+import {
+  ChangePasswordInput,
+  SendRecoveryEmailInput,
+  SignInInput,
+  SignUpInput,
+} from './dto/input';
 import { AuthService } from './auth.service';
 
 @Resolver()
@@ -27,8 +32,11 @@ export class AuthResolver {
   @Mutation(() => MailResponse, {
     name: 'sendRecoveryPasswordMail',
   })
-  sendEmail(@Args('email', { type: () => String }) email: string) {
-    return this.authService.sendRecoveryEmail(email);
+  sendEmail(
+    @Args('sendRecoveryEmailInput')
+    sendRecoveryEmailInput: SendRecoveryEmailInput,
+  ) {
+    return this.authService.sendRecoveryEmail(sendRecoveryEmailInput);
   }
 
   @Mutation(() => MailResponse, {

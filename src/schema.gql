@@ -163,7 +163,7 @@ type Mutation {
 
   """Login user"""
   SignIn(signInInput: SignInInput!): AuthResponse!
-  sendRecoveryPasswordMail(email: String!): RecoveryPasswordResponse!
+  sendRecoveryPasswordMail(sendRecoveryEmailInput: SendRecoveryEmailInput!): RecoveryPasswordResponse!
   changePassword(changePasswordInput: ChangePasswordInput!): RecoveryPasswordResponse!
 
   """create a cart associated with the authenticated user"""
@@ -236,6 +236,10 @@ enum Role {
 input SignInInput {
   email: String!
   password: String!
+}
+
+input SendRecoveryEmailInput {
+  email: String!
 }
 
 input ChangePasswordInput {

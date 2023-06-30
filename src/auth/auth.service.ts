@@ -17,6 +17,7 @@ import { MailerService } from '../mailer/mailer.service';
 import UserNotFoundException from '../users/expections/user-not-found.exception';
 import { ConfigService } from '@nestjs/config';
 import { getRecoveryMail, getChangedPaswordMail } from './utils/mailsFormat';
+import { SendRecoveryEmailInput } from './dto/input';
 @Injectable()
 export class AuthService {
   private secret = this.configService.get<string>('jwt.secret');
@@ -56,7 +57,9 @@ export class AuthService {
     return { user, accessToken };
   }
 
-  async sendRecoveryEmail(email: string) {
+  async sendRecoveryEmail(sendRecoveryEmailInput: SendRecoveryEmailInput) {
+    const { email } = sendRecoveryEmailInput;
+
     const user = await this.userService.findOneByEmail(email);
 
     if (!user) {
