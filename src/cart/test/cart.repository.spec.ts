@@ -24,7 +24,7 @@ describe('PrismaCartRepository', () => {
   });
 
   describe('create', () => {
-    it('should create a image entity', async () => {
+    it('should create a cart entity', async () => {
       mockPrisma.cart.create.mockResolvedValueOnce(cart);
 
       const actual = await repository.create(cart);
@@ -35,7 +35,7 @@ describe('PrismaCartRepository', () => {
   });
 
   describe('findOne', () => {
-    it('should return a images searched by id', async () => {
+    it('should return a cart searched by id', async () => {
       mockPrisma.cart.findUnique.mockResolvedValueOnce(cart);
 
       const actual = await repository.findOne({ id: cart.id });

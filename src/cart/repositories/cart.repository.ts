@@ -23,7 +23,6 @@ export default class PrismaCartRepository implements GenericRepository<Cart> {
       skip,
       take,
       where,
-      include: this.includedInfo,
     });
   }
 

@@ -1,21 +1,33 @@
+import { Cart, ProductInCar } from '@prisma/client';
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { CartEntity } from './entities';
 import { CurrentUser } from '../auth/decoratos/current-user.decorator';
-import { UseGuards } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { CartService } from './services/cart.service';
 import ProductInCartService from './services/product-in-cart.service';
 import { ProductInCarEntity } from './entities';
 import { CreateProductInCarInput, RemoveProductInCartInput } from './dto/input';
+import { GenericRepository } from '../shared/repository.interface';
+import { ProductsService } from '../products/products.service';
 
-@Resolver()
+@Resolver(() => CartEntity)
 @UseGuards(JwtAuthGuard)
 export class CartResolver {
   constructor(
     private readonly cartService: CartService,
     private readonly productInCarService: ProductInCartService,
+    @Inject('ProductInCarRepository')
+    private readonly productInCartRepository: GenericRepository<ProductInCar>,
   ) {}
 
   @Query(() => [CartEntity], {
@@ -64,5 +76,11 @@ export class CartResolver {
     removeProductInCartInput: RemoveProductInCartInput,
   ) {
     return this.productInCarService.remove(+user.sub, removeProductInCartInput);
+  }
+
+  @ResolveField()
+  async products(@Parent() cart: Cart) {
+    const { id } = cart;
+    return this.productInCartRepository.findAll({ where: { cartId: id } });
   }
 }
