@@ -8,6 +8,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ProductsService } from '../products/products.service';
 import { CreateImageInput } from './dto/input/';
 import { ImageNotFoundException } from './exception/image-not-found.expection';
+import { ImageWithUrl } from '../types/generic';
 
 @Injectable()
 export class ImageService {
@@ -76,7 +77,7 @@ export class ImageService {
     return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
-  async getImagesByProductId(producId: number) {
+  async getImagesByProductId(producId: number): Promise<ImageWithUrl[]> {
     const response = [];
     const images = await this.imageRepository.findAllByProductId(producId);
 
