@@ -17,11 +17,14 @@ export interface GenericRepository<T> {
 export interface ImageRepository {
   create(data: object): Promise<Image>;
   findOne(where: object): Promise<Image | null>;
+  findAllByProductId(productId: number): Promise<Image[]>;
 }
 
 export interface ProductRepository extends GenericRepository<Product> {
   createLike(data: object): Promise<UserLikeProduct>;
   findLike(userId: number, productId: number): Promise<UserLikeProduct | null>;
+  findLastLike(productId: number): Promise<UserLikeProduct | null>;
+  deleteLike(where: object): Promise<UserLikeProduct>;
 }
 
 export interface OrderRepository {

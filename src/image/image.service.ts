@@ -1,77 +1,101 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import { ImageRepository } from '../shared/repository.interface';
-import { Upload } from '@aws-sdk/lib-storage';
-import { S3, CompleteMultipartUploadCommandOutput } from '@aws-sdk/client-s3';
+import { S3, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ProductsService } from '../products/products.service';
-import { plainToInstance } from 'class-transformer';
-import ImageReponse from './dto/response/image-response.dto';
-import NoFileException from './exception/not-file.exception';
+import { CreateImageInput } from './dto/input/';
+import { ImageNotFoundException } from './exception/image-not-found.expection';
+import { ImageWithUrl } from '../types/generic';
 
 @Injectable()
 export class ImageService {
   private s3Client: S3;
+  private readonly region = this.configService.get('aws.region')!;
+  private readonly accessKeyId = this.configService.get<string>('aws.key')!;
+  private readonly secretKey = this.configService.get('aws.secret')!;
+  private readonly bucketName = this.configService.get('aws.bucket')!;
+  private readonly EXPIRE_5MIN = 300;
+
   constructor(
     @Inject('ImageRepository')
     private readonly imageRepository: ImageRepository,
-    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => ProductsService))
     private readonly productService: ProductsService,
+    private readonly configService: ConfigService,
   ) {
     this.s3Client = new S3({
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID')!,
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY')!,
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretKey,
       },
-      region: this.configService.get('AWS_REGION'),
+      region: this.region,
     });
   }
 
-  async uploadFile(file: Express.Multer.File, filename: string) {
-    if (!file) {
-      throw new NoFileException();
+  async findOne(imageId: number) {
+    const image = await this.imageRepository.findOne({ id: imageId });
+
+    if (!image) {
+      throw new ImageNotFoundException();
     }
 
-    const { buffer, mimetype, originalname } = file;
-
-    const name = `${uuid()}-${filename}.${this.getTypeFile(originalname)}`;
-
-    const upload = new Upload({
-      client: this.s3Client,
-      params: {
-        Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME')!,
-        Body: buffer,
-        Key: name,
-        ContentType: mimetype,
-        Tagging: 'public=yes',
-      },
-    });
-    const { Location, Key }: CompleteMultipartUploadCommandOutput =
-      await upload.done();
-
-    return { Location, Key };
+    return image;
   }
 
-  async create(productId: number, file: Express.Multer.File) {
+  async create(createImageInput: CreateImageInput) {
+    const { productId, mimetype } = createImageInput;
+
     const { name: productName } = await this.productService.findOneById(
       productId,
     );
 
-    const { Location, Key } = await this.uploadFile(file, productName);
+    const fileName = `${uuid()}-${productName}.${mimetype.split('/')[1]}`;
+
+    const url = await this.createUrlToUploadImage(fileName, mimetype);
 
     const image = await this.imageRepository.create({
-      name: Key!,
-      url: Location!,
+      name: fileName,
+      mimetype,
       productId,
     });
 
-    return plainToInstance(ImageReponse, image);
+    const response = { ...image, url };
+
+    return response;
   }
 
-  private getTypeFile(origiName: string): string {
-    const fileType = origiName.split('.');
-    //get the type of file example .png .jpg
-    return `${fileType[fileType.length - 1]}`;
+  async createUrlToUploadImage(fileName: string, mimetype: string) {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileName,
+      ContentType: mimetype,
+    });
+
+    return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+  }
+
+  async getImagesByProductId(producId: number): Promise<ImageWithUrl[]> {
+    const response = [];
+    const images = await this.imageRepository.findAllByProductId(producId);
+
+    for (const image of images) {
+      response.push({ ...image, url: this.generateUrlS3Image(image.name) });
+    }
+
+    return response;
+  }
+
+  async generateUrlS3Image(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return getSignedUrl(this.s3Client, command, {
+      expiresIn: this.EXPIRE_5MIN,
+    });
   }
 }

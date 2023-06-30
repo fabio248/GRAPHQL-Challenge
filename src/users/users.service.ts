@@ -1,7 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/request/create-user.dto';
-import { UpdateUserDto } from './dto/request/update-user.dto';
+import { UpdateUserInput } from './dto/input/update-user.input';
 import { GenericRepository } from 'src/shared/repository.interface';
 import { User } from '@prisma/client';
 import { hashSync } from 'bcrypt';
@@ -10,6 +9,8 @@ import { UserResponse } from './dto/response/user-response.dto';
 import * as Jwt from 'jsonwebtoken';
 import EmailAlreadyTakenException from './expections/email-already-taken.expection';
 import UserNotFoundException from './expections/user-not-found.exception';
+import { PayloadJwt } from '../types/generic';
+import { SignUpInput } from '../auth/dto/input';
 
 @Injectable()
 export class UserService {
@@ -33,14 +34,14 @@ export class UserService {
     return listUser.map((user) => plainToInstance(UserResponse, user));
   }
 
-  async findOneById(userId: number): Promise<UserResponse> {
+  async findOneById(userId: number): Promise<User> {
     const user: User | null = await this.userRepository.findOne({ id: userId });
 
     if (!user) {
       throw new UserNotFoundException();
     }
 
-    return plainToInstance(UserResponse, user);
+    return user;
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -49,7 +50,7 @@ export class UserService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+  async create(createUserDto: SignUpInput): Promise<User> {
     const isEmailAlreadyTaken = await this.userRepository.findOne({
       email: createUserDto.email,
     });
@@ -63,22 +64,25 @@ export class UserService {
       password: this.hashPassword(createUserDto.password),
     });
 
-    return plainToInstance(UserResponse, user);
+    return user;
   }
 
-  update(userId: number, updateUserDto: UpdateUserDto): UserResponse {
-    const { password } = updateUserDto;
+  async update(
+    userId: number,
+    updateUserInput: UpdateUserInput,
+  ): Promise<User> {
+    const { password } = updateUserInput;
 
     const params = {
       where: { id: userId },
       data: {
-        ...updateUserDto,
+        ...updateUserInput,
         password: password ? this.hashPassword(password) : undefined,
       },
     };
     const updatedUser = this.userRepository.update(params);
 
-    return plainToInstance(UserResponse, updatedUser);
+    return updatedUser;
   }
 
   async remove(userId: number): Promise<UserResponse> {
@@ -92,7 +96,7 @@ export class UserService {
     return hashSync(password, 10);
   }
 
-  async createAccessToken(user: UserResponse) {
+  async createAccessToken(user: User) {
     const jwtSecret = this.configService.get('JWT_SECRET');
 
     const payload: Jwt.JwtPayload = this.createPayload(user);
@@ -109,8 +113,21 @@ export class UserService {
     return accessToken;
   }
 
-  private createPayload(user: UserResponse) {
-    const payload: Jwt.JwtPayload = {
+  async isValidRecoveryToken(
+    userId: number,
+    recoveryToken: string,
+  ): Promise<boolean> {
+    const user = await this.findOneById(userId);
+
+    if (user.recoveryToken !== recoveryToken) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private createPayload(user: User) {
+    const payload: PayloadJwt = {
       sub: user.id.toString(),
       role: user.role,
     };

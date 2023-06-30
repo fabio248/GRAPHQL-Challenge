@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateCatalogDto } from './dto/request/create-category.dto';
+import { CreateCategoryInput } from './dto/inputs/create-category.input';
 import { GenericRepository } from '../shared/repository.interface';
 import { Category } from '@prisma/client';
 import CategoryNotFoundException from './expection/category-not-found.expection';
 import { plainToClass, plainToInstance } from 'class-transformer';
-import CategoryReponse from './dto/response/category.dto';
+import CategoryEntity from './entity/category.entity';
 
 @Injectable()
 export class CategoryService {
@@ -13,17 +13,19 @@ export class CategoryService {
     private readonly catalogRepository: GenericRepository<Category>,
   ) {}
 
-  async create(createCatalogDto: CreateCatalogDto): Promise<CategoryReponse> {
+  async create(
+    createCatalogInput: CreateCategoryInput,
+  ): Promise<CategoryEntity> {
     const newCategory: Category = await this.catalogRepository.create(
-      createCatalogDto,
+      createCatalogInput,
     );
 
-    return plainToClass(CategoryReponse, newCategory);
+    return plainToClass(CategoryEntity, newCategory);
   }
 
   async findAll(
     params: { take: number; skip: number } = { take: 10, skip: 0 },
-  ): Promise<CategoryReponse[]> {
+  ): Promise<CategoryEntity[]> {
     const { take, skip } = params;
     const listCategories: Category[] = await this.catalogRepository.findAll({
       take,
@@ -31,7 +33,7 @@ export class CategoryService {
     });
 
     return listCategories.map((category: Category) =>
-      plainToInstance(CategoryReponse, category),
+      plainToInstance(CategoryEntity, category),
     );
   }
 
@@ -44,6 +46,6 @@ export class CategoryService {
       throw new CategoryNotFoundException();
     }
 
-    return plainToInstance(CategoryReponse, category);
+    return plainToInstance(CategoryEntity, category);
   }
 }

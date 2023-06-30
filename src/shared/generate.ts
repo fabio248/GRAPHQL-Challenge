@@ -12,6 +12,11 @@ const getDescription = faker.commerce.productDescription;
 const getRole = faker.helpers.arrayElement(['CLIENT', 'MANAGER']);
 const getPrice = faker.commerce.price;
 const getUrl = faker.internet.url();
+const getMimeType = faker.helpers.arrayElement([
+  'image/jpg',
+  'image/png',
+  'image/jpge',
+]);
 
 function buildReq({ ...overrides } = {}) {
   const req = { user: buildUserReq(), body: {}, params: {}, ...overrides };
@@ -102,7 +107,7 @@ function buildImage({ ...overrides } = {}) {
   return {
     id: getId,
     name: getTitleProducts,
-    url: getUrl,
+    mimetype: getMimeType,
     productId: getId,
     ...overrides,
   };
@@ -128,4 +133,5 @@ export {
   getUsername,
   getTitleProducts,
   getPrice,
+  getUrl,
 };

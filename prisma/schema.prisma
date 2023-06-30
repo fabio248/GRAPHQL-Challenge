@@ -16,7 +16,8 @@ model User {
   password      String
   username      String
   role          Role              @default(CLIENT)
-  accessToken   String?            
+  accessToken   String?
+  recoveryToken String?            
   createdAt     DateTime          @default(now()) @map("created_at")
   updatedAt     DateTime          @updatedAt @map("updated_at")
 
@@ -52,7 +53,7 @@ model Product {
 model Image {
   id            Int         @default(autoincrement()) @id
   name          String
-  url           String
+  mimetype      String
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt      @map("updated_at")
 
@@ -86,7 +87,7 @@ model UserLikeProduct {
   userId        Int        @map("user_id")
 
   @@id([userId,productId])
-  @@map("user_like_post")
+  @@map("user_like_product")
 }
 
 model Cart {

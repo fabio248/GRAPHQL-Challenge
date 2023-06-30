@@ -1,4 +1,3 @@
-import { ProductResponse } from './../../products/dto/response/product.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   MockContextCartService,
@@ -14,27 +13,30 @@ import ProductInCartService from '../services/product-in-cart.service';
 import {
   MockContextProductInCartRepo,
   createMockProductInCartRepo,
-} from '../../shared/mocks/cart/product-in-car.repository';
+} from '../../shared/mocks/cart/product-in-car.repository.mock';
 import {
   buildCart,
   buildProduct,
   buildProductInCart,
   getId,
 } from '../../shared/generate';
-import CartResponse from '../dto/response/car-response.dto';
-import ProductInCarResponse from '../dto/response/products-in-car.dto';
-import CreateProductInCarDto from '../dto/request/create-product-in-cat';
+import { CartEntity } from '../entities/car.entity';
+import { CreateProductInCarInput } from '../dto/input';
+import { ProductInCar } from '@prisma/client';
+import { ProductEntity } from '../../products/entities';
+import ProductInCarNotFoundException from '../expections/product-in-cart-not-found.exception';
+import NoEnoughStockException from '../expections/no-enough-stock.exception';
 
 describe('ProductInCartService', () => {
   let service: ProductInCartService;
   let mockProductInCarRepo: MockContextProductInCartRepo;
   let mockProductService: MockContextProductService;
   let mockCartService: MockContextCartService;
-  const cart = buildCart({ id: getId }) as unknown as CartResponse;
-  const product = buildProduct() as unknown as ProductResponse;
-  const productInCart = buildProductInCart() as unknown as ProductInCarResponse;
+  const cart = buildCart({ id: getId }) as unknown as CartEntity;
+  const product = buildProduct() as unknown as ProductEntity;
+  const productInCart = buildProductInCart() as unknown as ProductInCar;
   const createProductInCart =
-    buildProductInCart() as unknown as CreateProductInCarDto;
+    buildProductInCart() as unknown as CreateProductInCarInput;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,6 +61,9 @@ describe('ProductInCartService', () => {
   });
   describe('create', () => {
     const cartId = getId;
+    const product = buildProduct({
+      stock: Number.MAX_VALUE,
+    }) as unknown as ProductEntity;
     it('should create a product in car', async () => {
       mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
       mockProductService.findOneById.mockResolvedValueOnce(product);
@@ -69,21 +74,38 @@ describe('ProductInCartService', () => {
       const actual = await service.create(createProductInCart, cartId);
 
       expect(actual).toEqual(productInCart);
+      expect(mockProductInCarRepo.create).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('add', () => {
-    const quantity = Number.MIN_SAFE_INTEGER;
-    const product = buildProduct({
-      stock: Number.MAX_SAFE_INTEGER,
-    }) as unknown as ProductResponse;
-    it('should add quantity product in cart', async () => {
-      mockProductInCarRepo.update.mockResolvedValue(productInCart);
-      mockCartService.updateTotalAmount.mockResolvedValueOnce();
+    it('if product in cart already exits should invoke add product to cart function', async () => {
+      mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
+      mockProductService.findOneById.mockResolvedValueOnce(product);
+      mockProductService.checkEnoughStock.mockResolvedValueOnce();
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(productInCart);
+      mockProductInCarRepo.update.mockResolvedValueOnce(productInCart);
 
-      const actual = await service.add(productInCart, quantity, product);
+      const actual = await service.create(createProductInCart, cartId);
 
       expect(actual).toEqual(productInCart);
+      expect(mockProductInCarRepo.update).toHaveBeenCalledTimes(1);
+      expect(mockProductInCarRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('throw an error when product does not have enough stock', async () => {
+      const product = buildProduct({
+        stock: Number.MIN_VALUE,
+      }) as unknown as ProductEntity;
+      mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
+      mockProductService.findOneById.mockResolvedValueOnce(product);
+      mockProductService.checkEnoughStock.mockResolvedValueOnce();
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(productInCart);
+      mockProductInCarRepo.update.mockResolvedValueOnce(productInCart);
+
+      const actual = () => service.create(createProductInCart, cartId);
+
+      expect(actual).rejects.toEqual(new NoEnoughStockException(product.id));
+      expect(mockProductInCarRepo.update).not.toHaveBeenCalledTimes(1);
+      expect(mockProductInCarRepo.create).not.toHaveBeenCalled();
     });
   });
 
@@ -111,6 +133,16 @@ describe('ProductInCartService', () => {
       expect(actual).toEqual(productInCart);
       expect(mockProductInCarRepo.findOne).toHaveBeenCalledTimes(1);
     });
+
+    it('throw an error when product in cart does not exits', async () => {
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(null);
+
+      const actual = () =>
+        service.findOneById(productInCart.cartId, productInCart.productId);
+
+      expect(actual).rejects.toEqual(new ProductInCarNotFoundException());
+      expect(mockProductInCarRepo.findOne).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('remove', () => {
@@ -120,10 +152,9 @@ describe('ProductInCartService', () => {
       mockProductInCarRepo.delete.mockResolvedValueOnce(productInCart);
       mockCartService.decreaseTotalAmount.mockResolvedValueOnce();
 
-      const actual = await service.remove(
-        productInCart.cartId,
-        productInCart.productId,
-      );
+      const actual = await service.remove(productInCart.cartId, {
+        productId: productInCart.productId,
+      });
 
       expect(actual).toEqual(productInCart);
       expect(mockCartService.findOneByUserId).toHaveBeenCalledTimes(1);

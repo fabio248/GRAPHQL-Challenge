@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CartService } from '../cart/services/cart.service';
 import { PrismaService } from '../database/prisma.service';
-import OrderResponse from './dto/order-response.dto';
-import { plainToInstance } from 'class-transformer';
-import NoProductsInCarException from './exception/no-product-in-cart.exception';
+import { NoProductsInCarException, OrderNotFoundException } from './exception';
 import { OrderRepository } from '../shared/repository.interface';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
+import { Order } from '@prisma/client';
+import { ProductsService } from '../products/products.service';
+import { ProductInCarEntity } from '../cart/entities';
 
 @Injectable()
 export class OrdersService {
@@ -14,6 +15,7 @@ export class OrdersService {
     private readonly orderRepository: OrderRepository,
     private readonly cartService: CartService,
     private readonly prisma: PrismaService,
+    private readonly productService: ProductsService,
   ) {}
 
   async create(userId: number) {
@@ -36,6 +38,7 @@ export class OrdersService {
       if (product.stock < quantity) {
         throw new NoEnoughStockException(product.id);
       }
+
       //add all products that have to update stock
       productToUpdateStock.push(
         this.prisma.product.update({
@@ -83,10 +86,7 @@ export class OrdersService {
         orderDetails: {
           include: {
             product: {
-              select: {
-                name: true,
-                price: true,
-              },
+              include: { category: true },
             },
           },
         },
@@ -100,22 +100,32 @@ export class OrdersService {
       ...productToUpdateStock,
     ]);
 
-    return plainToInstance(OrderResponse, response[POSITION_ORDER]);
+    this.invoke(productsInCar);
+
+    return response[POSITION_ORDER];
   }
 
   async findAll(skip?: number, take?: number, userId?: number) {
-    const listOrders = await this.orderRepository.findAll({
+    return this.orderRepository.findAll({
       skip,
       take,
       where: { userId },
     });
-
-    return listOrders.map((order) => plainToInstance(OrderResponse, order));
   }
 
-  async findOne(id: number): Promise<OrderResponse> {
+  async findOne(id: number): Promise<Order> {
     const order = await this.orderRepository.findOne({ id });
 
-    return plainToInstance(OrderResponse, order);
+    if (!order) {
+      throw new OrderNotFoundException();
+    }
+
+    return order;
+  }
+
+  invoke(productsInCart: ProductInCarEntity[]) {
+    productsInCart.forEach((product) => {
+      this.productService.checkStockLessThan3(product.productId);
+    });
   }
 }

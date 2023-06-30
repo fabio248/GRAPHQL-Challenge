@@ -1,0 +1,253 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserEntiy {
+  """user's id"""
+  id: Int!
+
+  """user's email"""
+  email: String!
+  username: String!
+  role: String!
+}
+
+type CartEntity {
+  id: Int!
+  total: String!
+  user: UserEntiy!
+  products: [ProductInCarEntity!]
+}
+
+type CategoryEntity {
+  id: Int!
+  name: String!
+  description: String!
+}
+
+type ImageEntity {
+  id: Int!
+  name: String!
+  mimetype: String!
+  url: String!
+}
+
+type ProductEntity {
+  id: Int!
+  name: String!
+  description: String!
+  stock: Int!
+  price: String!
+  isEnable: Boolean!
+  category: CategoryEntity!
+  images: [ImageEntity!]!
+}
+
+type ProductInCarEntity {
+  quantity: String!
+  subtotal: String!
+  product: ProductEntity!
+  cartId: Int!
+  productId: Int!
+}
+
+type UserLikeProductEntity {
+  productId: Int!
+  userId: Int!
+  type: String!
+}
+
+type AuthResponse {
+  """access token"""
+  accessToken: String!
+
+  """user's information"""
+  user: UserEntiy!
+}
+
+type RecoveryPasswordResponse {
+  message: String!
+}
+
+type OrderDetailsEntity {
+  id: Int!
+  quantity: Int!
+  subtotal: String!
+  orderId: Int!
+  product: ProductEntity!
+}
+
+type OrderEntity {
+  id: Int!
+  userId: Int!
+  total: String!
+  orderDetails: [OrderDetailsEntity!]!
+}
+
+type Query {
+  """user can have access their own info"""
+  getMyInfo: UserEntiy!
+
+  """get a list of products without authentication"""
+  getListProducts(
+    """add products that are disable"""
+    embedDisabledProducts: Boolean = false
+
+    """numbers of products to skip"""
+    skip: Int = 0
+
+    """numbers of products to take"""
+    take: Int = 10
+
+    """filter product by category"""
+    categoryId: Int
+  ): [ProductEntity!]!
+
+  """get one product search by id"""
+  getOneProduct(productId: Int!): ProductEntity!
+
+  """get categories list"""
+  listCategories: [CategoryEntity!]!
+  sendMail: String!
+
+  """Manager can get a list of all carts"""
+  getListCarts: [CartEntity!]!
+
+  """Client can get their own cart and products in cart"""
+  getMyCart: CartEntity!
+
+  """Client can see a list of their orders"""
+  getMyOrders: [OrderEntity!]!
+
+  """Manager can get a list of orders client"""
+  getListOrders: [OrderEntity!]!
+
+  """Manager and client can search one order by id"""
+  getOneOrder(orderId: Int!): OrderEntity!
+}
+
+type Mutation {
+  """user can update their own info"""
+  updateMyInfo(updateUserInput: UpdateUserInput!): UserEntiy!
+
+  """delete your account"""
+  deleteYourOwnAccount: UserEntiy!
+
+  """Manager can create a new product"""
+  createProduct(createProductInput: CreateProductInput!): ProductEntity!
+
+  """Manager can update a product by id"""
+  updateProduct(productId: Int!, updateProductInput: UpdateProductInput!): ProductEntity!
+
+  """
+  Manager can active or desactive a product by id, if the product is active this will be desactive and vice versa
+  """
+  changeProductStatus(productId: Int!): ProductEntity!
+
+  """Manager can delete a product by id"""
+  deleteProduct(productId: Int!): ProductEntity!
+
+  """
+  Client can like or unlike a product, if the user already liked a product this will be unliked
+  """
+  createLikeToProduct(productId: Int!): UserLikeProductEntity!
+
+  """Manager can create a new category for products"""
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryEntity!
+
+  """Manager can add image to specific product"""
+  addImageToProduct(createImageInput: CreateImageInput!): ImageEntity!
+
+  """Register a new user"""
+  SignUp(signUpInput: SignUpInput!): AuthResponse!
+
+  """Login user"""
+  SignIn(signInInput: SignInInput!): AuthResponse!
+  sendRecoveryPasswordMail(email: String!): RecoveryPasswordResponse!
+  changePassword(changePasswordInput: ChangePasswordInput!): RecoveryPasswordResponse!
+
+  """create a cart associated with the authenticated user"""
+  createCart: CartEntity!
+
+  """Client can add product to their cart"""
+  addProductToMyCart(createProductInCar: CreateProductInCarInput!): ProductInCarEntity!
+
+  """Client can delete specific product by id"""
+  removeProductToMyCart(removeProductInCartInput: RemoveProductInCartInput!): ProductInCarEntity!
+
+  """Client can create a order from products that have on cart"""
+  createOrder: OrderEntity!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  username: String
+}
+
+input CreateProductInput {
+  name: String!
+  description: String!
+  stock: Int!
+  price: String!
+  categoryId: Int!
+  isEnable: Boolean = true
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  stock: Int
+  price: String
+  categoryId: Int
+  isEnable: Boolean = true
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
+}
+
+input CreateImageInput {
+  mimetype: mimeType!
+  productId: Int!
+}
+
+enum mimeType {
+  jpg
+  png
+  jpge
+}
+
+input SignUpInput {
+  email: String!
+  password: String!
+  username: String!
+
+  """user role this can be: CLIENT or MANAGER"""
+  role: Role = CLIENT
+}
+
+enum Role {
+  CLIENT
+  MANAGER
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  recoveryToken: String!
+}
+
+input CreateProductInCarInput {
+  quantity: Int!
+  productId: Int!
+}
+
+input RemoveProductInCartInput {
+  productId: Int!
+}

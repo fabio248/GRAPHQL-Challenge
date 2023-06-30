@@ -28,24 +28,12 @@ export default class PrismaProductRepository implements ProductRepository {
   ): Promise<Product | null> {
     return this.prisma.product.findUnique({
       where,
-      include: {
-        category: true,
-        images: true,
-      },
     });
   }
 
   async create(data: Prisma.ProductCreateInput): Promise<Product> {
     return this.prisma.product.create({
       data,
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
     });
   }
 
@@ -70,6 +58,21 @@ export default class PrismaProductRepository implements ProductRepository {
   async findLike(userId: number, productId: number) {
     return this.prisma.userLikeProduct.findUnique({
       where: { userId_productId: { userId, productId } },
+    });
+  }
+
+  async deleteLike(
+    where: Prisma.UserLikeProductWhereUniqueInput,
+  ): Promise<UserLikeProduct> {
+    return this.prisma.userLikeProduct.delete({
+      where,
+    });
+  }
+
+  async findLastLike(productId: number): Promise<UserLikeProduct | null> {
+    return this.prisma.userLikeProduct.findFirst({
+      where: { productId },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

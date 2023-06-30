@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GenericRepository } from '../../shared/repository.interface';
 import { ProductInCar } from '@prisma/client';
-import CreateProductInCarDto from '../dto/request/create-product-in-cat';
+import { CreateProductInCarInput } from '../dto/input/create-product-in-cat.input';
 import { CartService } from './cart.service';
 import { ProductsService } from '../../products/products.service';
 import { plainToInstance } from 'class-transformer';
-import ProductInCarResponse from '../dto/response/products-in-car.dto';
+import { ProductInCarEntity } from '../entities';
 import NoEnoughStockException from '../expections/no-enough-stock.exception';
 import ProductInCarNotFoundException from '../expections/product-in-cart-not-found.exception';
-import { ProductResponse } from '../../products/dto/response/product.dto';
+import { ProductEntity } from '../../products/entities';
+import { RemoveProductInCartInput } from '../dto/input';
 
 @Injectable()
 export default class ProductInCartService {
@@ -19,41 +20,41 @@ export default class ProductInCartService {
     private readonly productService: ProductsService,
   ) {}
 
-  async create(data: CreateProductInCarDto, userId: number) {
+  async create(data: CreateProductInCarInput, userId: number) {
     const cart = await this.cartService.findOneByUserId(userId);
-    const product: ProductResponse = await this.productService.findOneById(
+    const product: ProductEntity = await this.productService.findOneById(
       data.productId,
     );
 
     await this.productService.checkEnoughStock(product.id, data.quantity);
 
-    const producInCar = await this.isProductAlreadyAddedCart(
+    const alreadyExitsProducInCar = await this.isProductAlreadyAddedCart(
       cart.id,
       product.id,
     );
 
-    if (producInCar) {
-      return await this.add(producInCar, data.quantity, product);
+    if (alreadyExitsProducInCar) {
+      return this.add(alreadyExitsProducInCar, data.quantity, product);
     }
 
     const subtotal = data.quantity * product.price;
 
-    const producInCart = await this.productInCartRepository.create({
+    const newProductInCart = await this.productInCartRepository.create({
       ...data,
       subtotal,
       cartId: cart.id,
     });
 
-    await this.cartService.updateTotalAmount(cart.id);
+    this.cartService.updateTotalAmount(cart.id);
 
-    return plainToInstance(ProductInCarResponse, producInCart);
+    return newProductInCart;
   }
 
-  async add(
+  private async add(
     productInCar: ProductInCar,
     quantity: number,
-    product: ProductResponse,
-  ): Promise<ProductInCarResponse> {
+    product: ProductEntity,
+  ): Promise<ProductInCar> {
     const newQuantity = productInCar.quantity + quantity;
     const newsubTotal = productInCar.subtotal + quantity * product.price;
 
@@ -73,14 +74,14 @@ export default class ProductInCartService {
 
     await this.cartService.updateTotalAmount(productInCar.cartId);
 
-    return plainToInstance(ProductInCarResponse, updatedProductInCar);
+    return updatedProductInCar;
   }
 
-  async findAll(): Promise<ProductInCarResponse[]> {
+  async findAll(): Promise<ProductInCarEntity[]> {
     const listProductInCart = await this.productInCartRepository.findAll({});
 
     return listProductInCart.map((product) => {
-      return plainToInstance(ProductInCarResponse, product);
+      return plainToInstance(ProductInCarEntity, product);
     });
   }
 
@@ -96,7 +97,11 @@ export default class ProductInCartService {
     return productInCar;
   }
 
-  async remove(userId: number, productId: number) {
+  async remove(
+    userId: number,
+    removeProductInCartInput: RemoveProductInCartInput,
+  ) {
+    const { productId } = removeProductInCartInput;
     const cart = await this.cartService.findOneByUserId(userId);
 
     //Check if the product in cart exists
@@ -108,7 +113,7 @@ export default class ProductInCartService {
 
     await this.cartService.decreaseTotalAmount(cart, productInCar.subtotal);
 
-    return plainToInstance(ProductInCarResponse, productInCar);
+    return plainToInstance(ProductInCarEntity, productInCar);
   }
 
   private async isProductAlreadyAddedCart(cartId: number, productId: number) {

@@ -11,10 +11,12 @@ import {
   createMockCartService,
 } from '../../shared/mocks/cart/cart.service.mock';
 import { MockContext, createMockContext } from '../../shared/mocks/prisma.mock';
-import CartResponse from '../../cart/dto/response/car-response.dto';
+import { CartEntity } from '../../cart/entities';
 import { buildCart, buildOrder, getId } from '../../shared/generate';
-import NoProductsInCarException from '../exception/no-product-in-cart.exception';
+import { NoProductsInCarException, OrderNotFoundException } from '../exception';
 import { Order } from '@prisma/client';
+import { ProductsService } from '../../products/products.service';
+import { createMockProductService } from '../../shared/mocks/product/product.service.mock';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -31,6 +33,7 @@ describe('OrdersService', () => {
         PrismaService,
         { provide: 'OrderRepository', useFactory: createMockOrderRepo },
         { provide: PrismaService, useFactory: createMockContext },
+        { provide: ProductsService, useFactory: createMockProductService },
       ],
     }).compile();
 
@@ -45,7 +48,7 @@ describe('OrdersService', () => {
   });
 
   describe('create', () => {
-    let cart = buildCart() as unknown as CartResponse;
+    let cart = buildCart() as unknown as CartEntity;
     const userId = getId;
 
     it('should create a new order', async () => {
@@ -62,7 +65,7 @@ describe('OrdersService', () => {
     });
 
     it('throw an error when does not exits products in car', async () => {
-      cart = buildCart({ products: [] }) as unknown as CartResponse;
+      cart = buildCart({ products: [] }) as unknown as CartEntity;
 
       mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
 
@@ -92,6 +95,15 @@ describe('OrdersService', () => {
       const actual = await service.findOne(order.id);
 
       expect(actual).toEqual(order);
+      expect(mockRepo.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('throw an error when the order does not exits', async () => {
+      mockRepo.findOne.mockResolvedValueOnce(null);
+
+      const actual = () => service.findOne(order.id);
+
+      expect(actual).rejects.toEqual(new OrderNotFoundException());
       expect(mockRepo.findOne).toHaveBeenCalledTimes(1);
     });
   });

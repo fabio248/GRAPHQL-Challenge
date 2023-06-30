@@ -10,17 +10,16 @@ import {
 } from '../../shared/mocks/users/user.service.mock';
 import { UserService } from '../../users/users.service';
 import { buildCart, buildUser, getId, getPrice } from '../../shared/generate';
-import { Cart } from '@prisma/client';
+import { Cart, User } from '@prisma/client';
 import UserAlreadyHaveCartException from '../expections/user-already-have-cart.exception';
-import { UserResponse } from '../../users/dto/response/user-response.dto';
 import CartNotFoundException from '../expections/cart-not-found.exception';
-import CartResponse from '../dto/response/car-response.dto';
+import { CartEntity } from '../entities/car.entity';
 
 describe('CartService', () => {
   let service: CartService;
   let mockCartRepo: MockContextCartRepo;
   let mockUserService: MockContextUserService;
-  const user = buildUser() as unknown as UserResponse;
+  const user = buildUser() as unknown as User;
   const cart = buildCart({
     productId: undefined,
   }) as unknown as Cart;
@@ -157,12 +156,15 @@ describe('CartService', () => {
 
   describe('decreaseTotalAmount', () => {
     const newTotal = getPrice();
-    const updatedCart = { ...cart, total: newTotal } as unknown as CartResponse;
+    const updatedCart = { ...cart, total: newTotal } as unknown as Cart;
     it('should decrease amount of cart', async () => {
       mockCartRepo.findOne.mockResolvedValue(cart);
       mockCartRepo.update.mockResolvedValueOnce(updatedCart);
 
-      await service.decreaseTotalAmount(cart as CartResponse, +newTotal);
+      await service.decreaseTotalAmount(
+        cart as unknown as CartEntity,
+        +newTotal,
+      );
 
       expect(mockCartRepo.update).toHaveBeenCalled();
     });
@@ -170,12 +172,15 @@ describe('CartService', () => {
 
   describe('replaceTotalAmount', () => {
     const newTotal = getPrice();
-    const updatedCart = { ...cart, total: newTotal } as unknown as CartResponse;
+    const updatedCart = { ...cart, total: newTotal } as unknown as Cart;
     it('should decrease amount of cart', async () => {
       mockCartRepo.findOne.mockResolvedValue(cart);
       mockCartRepo.update.mockResolvedValueOnce(updatedCart);
 
-      await service.decreaseTotalAmount(cart as CartResponse, +newTotal);
+      await service.decreaseTotalAmount(
+        cart as unknown as CartEntity,
+        +newTotal,
+      );
 
       expect(mockCartRepo.update).toHaveBeenCalled();
     });

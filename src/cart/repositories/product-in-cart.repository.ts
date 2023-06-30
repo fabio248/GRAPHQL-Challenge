@@ -7,6 +7,8 @@ import { Injectable } from '@nestjs/common';
 export default class PrismaProductInCarRepository
   implements GenericRepository<ProductInCar>
 {
+  private readonly includedInfo = { product: { include: { category: true } } };
+
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(params: {
@@ -14,27 +16,31 @@ export default class PrismaProductInCarRepository
     take?: number;
     cursor?: Prisma.ProductInCarWhereUniqueInput;
     where?: object | undefined;
-    include?: object | undefined;
   }): Promise<ProductInCar[]> {
-    const { skip, take, cursor, include, where } = params;
+    const { skip, take, cursor, where } = params;
 
     return this.prisma.productInCar.findMany({
       skip,
       take,
       cursor,
-      include,
+      include: this.includedInfo,
       where,
     });
   }
+
   findOne(
     where: Prisma.ProductInCarWhereUniqueInput,
   ): Promise<ProductInCar | null> {
-    return this.prisma.productInCar.findUnique({ where });
+    return this.prisma.productInCar.findUnique({
+      where,
+      include: this.includedInfo,
+    });
   }
 
   create(data: Prisma.ProductInCarUncheckedCreateInput): Promise<ProductInCar> {
     return this.prisma.productInCar.create({
       data,
+      include: this.includedInfo,
     });
   }
 
@@ -44,10 +50,17 @@ export default class PrismaProductInCarRepository
   }): Promise<ProductInCar> {
     const { where, data } = params;
 
-    return this.prisma.productInCar.update({ where, data });
+    return this.prisma.productInCar.update({
+      where,
+      data,
+      include: this.includedInfo,
+    });
   }
 
   delete(where: Prisma.ProductInCarWhereUniqueInput): Promise<ProductInCar> {
-    return this.prisma.productInCar.delete({ where });
+    return this.prisma.productInCar.delete({
+      where,
+      include: this.includedInfo,
+    });
   }
 }
