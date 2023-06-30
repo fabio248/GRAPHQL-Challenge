@@ -13,8 +13,10 @@ import {
 import { MockContext, createMockContext } from '../../shared/mocks/prisma.mock';
 import { CartEntity } from '../../cart/entities';
 import { buildCart, buildOrder, getId } from '../../shared/generate';
-import NoProductsInCarException from '../exception/no-product-in-cart.exception';
+import { NoProductsInCarException, OrderNotFoundException } from '../exception';
 import { Order } from '@prisma/client';
+import { ProductsService } from '../../products/products.service';
+import { createMockProductService } from '../../shared/mocks/product/product.service.mock';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -31,6 +33,7 @@ describe('OrdersService', () => {
         PrismaService,
         { provide: 'OrderRepository', useFactory: createMockOrderRepo },
         { provide: PrismaService, useFactory: createMockContext },
+        { provide: ProductsService, useFactory: createMockProductService },
       ],
     }).compile();
 
@@ -92,6 +95,15 @@ describe('OrdersService', () => {
       const actual = await service.findOne(order.id);
 
       expect(actual).toEqual(order);
+      expect(mockRepo.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('throw an error when the order does not exits', async () => {
+      mockRepo.findOne.mockResolvedValueOnce(null);
+
+      const actual = () => service.findOne(order.id);
+
+      expect(actual).rejects.toEqual(new OrderNotFoundException());
       expect(mockRepo.findOne).toHaveBeenCalledTimes(1);
     });
   });

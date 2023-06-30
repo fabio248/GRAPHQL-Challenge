@@ -16,7 +16,7 @@ export class MailerService {
     const transporter = createTransport({
       host: this.host,
       port: this.port,
-      secure: this.port === 465 ? true : false, // true for 465, false for other ports
+      secure: true, // true for 465, false for other ports
       auth: {
         user: this.email,
         pass: this.password,

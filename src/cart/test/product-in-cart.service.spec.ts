@@ -24,6 +24,8 @@ import { CartEntity } from '../entities/car.entity';
 import { CreateProductInCarInput } from '../dto/input';
 import { ProductInCar } from '@prisma/client';
 import { ProductEntity } from '../../products/entities';
+import ProductInCarNotFoundException from '../expections/product-in-cart-not-found.exception';
+import NoEnoughStockException from '../expections/no-enough-stock.exception';
 
 describe('ProductInCartService', () => {
   let service: ProductInCartService;
@@ -59,6 +61,9 @@ describe('ProductInCartService', () => {
   });
   describe('create', () => {
     const cartId = getId;
+    const product = buildProduct({
+      stock: Number.MAX_VALUE,
+    }) as unknown as ProductEntity;
     it('should create a product in car', async () => {
       mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
       mockProductService.findOneById.mockResolvedValueOnce(product);
@@ -69,6 +74,38 @@ describe('ProductInCartService', () => {
       const actual = await service.create(createProductInCart, cartId);
 
       expect(actual).toEqual(productInCart);
+      expect(mockProductInCarRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('if product in cart already exits should invoke add product to cart function', async () => {
+      mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
+      mockProductService.findOneById.mockResolvedValueOnce(product);
+      mockProductService.checkEnoughStock.mockResolvedValueOnce();
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(productInCart);
+      mockProductInCarRepo.update.mockResolvedValueOnce(productInCart);
+
+      const actual = await service.create(createProductInCart, cartId);
+
+      expect(actual).toEqual(productInCart);
+      expect(mockProductInCarRepo.update).toHaveBeenCalledTimes(1);
+      expect(mockProductInCarRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('throw an error when product does not have enough stock', async () => {
+      const product = buildProduct({
+        stock: Number.MIN_VALUE,
+      }) as unknown as ProductEntity;
+      mockCartService.findOneByUserId.mockResolvedValueOnce(cart);
+      mockProductService.findOneById.mockResolvedValueOnce(product);
+      mockProductService.checkEnoughStock.mockResolvedValueOnce();
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(productInCart);
+      mockProductInCarRepo.update.mockResolvedValueOnce(productInCart);
+
+      const actual = () => service.create(createProductInCart, cartId);
+
+      expect(actual).rejects.toEqual(new NoEnoughStockException(product.id));
+      expect(mockProductInCarRepo.update).not.toHaveBeenCalledTimes(1);
+      expect(mockProductInCarRepo.create).not.toHaveBeenCalled();
     });
   });
 
@@ -94,6 +131,16 @@ describe('ProductInCartService', () => {
       );
 
       expect(actual).toEqual(productInCart);
+      expect(mockProductInCarRepo.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('throw an error when product in cart does not exits', async () => {
+      mockProductInCarRepo.findOne.mockResolvedValueOnce(null);
+
+      const actual = () =>
+        service.findOneById(productInCart.cartId, productInCart.productId);
+
+      expect(actual).rejects.toEqual(new ProductInCarNotFoundException());
       expect(mockProductInCarRepo.findOne).toHaveBeenCalledTimes(1);
     });
   });

@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CartService } from '../cart/services/cart.service';
 import { PrismaService } from '../database/prisma.service';
-import NoProductsInCarException from './exception/no-product-in-cart.exception';
+import { NoProductsInCarException, OrderNotFoundException } from './exception';
 import { OrderRepository } from '../shared/repository.interface';
 import NoEnoughStockException from '../cart/expections/no-enough-stock.exception';
 import { Order } from '@prisma/client';
@@ -117,7 +117,7 @@ export class OrdersService {
     const order = await this.orderRepository.findOne({ id });
 
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new OrderNotFoundException();
     }
 
     return order;

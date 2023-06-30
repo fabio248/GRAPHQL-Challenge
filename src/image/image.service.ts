@@ -53,7 +53,7 @@ export class ImageService {
 
     const fileName = `${uuid()}-${productName}.${mimetype.split('/')[1]}`;
 
-    const url = this.createUrlToUploadImage(fileName, mimetype);
+    const url = await this.createUrlToUploadImage(fileName, mimetype);
 
     const image = await this.imageRepository.create({
       name: fileName,

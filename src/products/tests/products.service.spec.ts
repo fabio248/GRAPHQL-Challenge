@@ -10,7 +10,12 @@ import { CreateProductInput } from '../dto/inputs/create-product.input';
 import { UpdateProductInput } from '../dto/inputs/update-product.input';
 import ProductNotFoundException from '../exceptions/product-not-found.expection';
 import NoEnoughStockException from '../../cart/expections/no-enough-stock.exception';
-import UserAlreadyLikeProductException from '../exceptions/user-already-liked-product.exception';
+import { UserService } from '../../users/users.service';
+import { createMockUserService } from '../../shared/mocks/users/user.service.mock';
+import { ImageService } from '../../image/image.service';
+import { createMockImageService } from '../../shared/mocks/image/image.service.mock';
+import { MailerService } from '../../mailer/mailer.service';
+import { createMockMailerService } from '../../shared/mocks/mailer/mailer.service.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -27,6 +32,9 @@ describe('ProductsService', () => {
       providers: [
         ProductsService,
         { provide: 'ProductRepository', useFactory: createMockProductRepo },
+        { provide: UserService, useFactory: createMockUserService },
+        { provide: ImageService, useFactory: createMockImageService },
+        { provide: MailerService, useFactory: createMockMailerService },
       ],
     }).compile();
 
@@ -137,26 +145,33 @@ describe('ProductsService', () => {
       it('should create a like on product', async () => {
         mockRepository.findLike.mockResolvedValueOnce(null);
         mockRepository.createLike.mockResolvedValueOnce(userLikeProduct);
+        mockRepository.findOne.mockResolvedValueOnce(product);
 
         const actual = await service.createLike(
           userLikeProduct.userId,
           userLikeProduct.productId,
         );
 
-        expect(actual).toEqual(userLikeProduct);
+        expect(actual).toEqual({ ...userLikeProduct, type: 'like' });
         expect(mockRepository.findLike).toHaveBeenCalledTimes(1);
         expect(mockRepository.createLike).toHaveBeenCalledTimes(1);
       });
 
-      it('throw an error when user already liked the product', async () => {
+      it('Delete like when user already liked the product', async () => {
         mockRepository.findLike.mockResolvedValueOnce(
           userLikeProduct as UserLikeProduct,
         );
+        mockRepository.deleteLike.mockResolvedValueOnce(
+          userLikeProduct as UserLikeProduct,
+        );
+        mockRepository.findOne.mockResolvedValue(product);
 
-        const actual = () =>
-          service.createLike(userLikeProduct.userId, userLikeProduct.productId);
+        const actual = await service.createLike(
+          userLikeProduct.userId,
+          userLikeProduct.productId,
+        );
 
-        expect(actual).rejects.toEqual(new UserAlreadyLikeProductException());
+        expect(actual).toEqual({ ...userLikeProduct, type: 'unliked' });
         expect(mockRepository.findLike).toHaveBeenCalledTimes(1);
       });
     });

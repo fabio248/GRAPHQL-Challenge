@@ -59,12 +59,12 @@ describe('UsersService', () => {
   });
   describe('findOneById', () => {
     const id = getId;
-    it('should return a user that exits without sensitive info', async () => {
+    it('should return a user that exits', async () => {
       mockUserRepository.findOne.mockResolvedValueOnce(user);
 
       const actual = await service.findOneById(id);
 
-      expect(actual).toEqual({ ...user, password: undefined });
+      expect(actual).toEqual(user);
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
     });
 
@@ -97,7 +97,7 @@ describe('UsersService', () => {
 
       const actual = await service.create(user as unknown as SignUpInput);
 
-      expect(actual).toEqual({ ...user, password: undefined });
+      expect(actual).toEqual(user);
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.create).toHaveBeenCalledTimes(1);
     });
@@ -127,17 +127,17 @@ describe('UsersService', () => {
         user as unknown as UpdateUserInput,
       );
 
-      expect(actual).toEqual({ ...user, password: undefined });
+      expect(actual).toEqual(user);
     });
 
-    it('should update a user and return user without sensitive info', async () => {
+    it('should update a user', async () => {
       const id = getId;
       const user = buildUser({ password: undefined }) as User;
       mockUserRepository.update.mockResolvedValueOnce(user);
 
       const actual = await service.update(id, user as UpdateUserInput);
 
-      expect(actual).toEqual({ ...user, password: undefined });
+      expect(actual).toEqual(user);
     });
   });
 
@@ -160,7 +160,7 @@ describe('UsersService', () => {
       const spySignJwt = jest.spyOn(Jwt, 'sign');
       spySignJwt.mockImplementation(() => token);
 
-      const actual = await service.createAccessToken(user as UserResponse);
+      const actual = await service.createAccessToken(user as User);
 
       expect(actual).toEqual(token);
       expect(mockUserRepository.update).toHaveBeenCalledTimes(1);

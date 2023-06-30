@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ChangePasswordInput } from './dto/input/change-password.input';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as Jwt from 'jsonwebtoken';
 import { SignInInput } from './dto/input/sign-in.input';
 import { SignUpInput } from './dto/input/sign-up.input';
 import { UserService } from '../users/users.service';
-import { AuthUnauthorizedException } from './exception';
+import { AuthUnauthorizedException, InvalidTokenException } from './exception';
 import {
   AuthResponse,
   ChangedPaswordResponse,
@@ -98,41 +99,27 @@ export class AuthService {
   }
 
   async changePassword(changePasswordInput: ChangePasswordInput) {
-    const { newPassword, recoveryToken } = changePasswordInput;
+    try {
+      const { newPassword, recoveryToken } = changePasswordInput;
+      const { sub: userId } = Jwt.verify(recoveryToken, this.secret as string);
 
-    const response = Jwt.verify(
-      recoveryToken,
-      this.secret as string,
-      async (err, payloadDecoded) => {
-        if (err) {
-          console.log({ err });
-          throw new UnauthorizedException('Invalid recovery token');
-        }
+      const isValidToken = await this.userService.isValidRecoveryToken(
+        +userId!,
+        recoveryToken,
+      );
 
-        if (!payloadDecoded || !payloadDecoded.sub) {
-          throw new UnauthorizedException('Invalid recovery token');
-        }
+      if (!isValidToken) {
+        throw new InvalidTokenException();
+      }
 
-        const { sub: userId } = payloadDecoded;
+      this.userService.update(+userId!, {
+        password: newPassword,
+        recoveryToken: null,
+      });
 
-        const isValidToken = await this.userService.isValidRecoveryToken(
-          +userId,
-          recoveryToken,
-        );
-
-        if (!isValidToken) {
-          throw new UnauthorizedException('Invalid recovery token');
-        }
-
-        this.userService.update(+userId, {
-          password: newPassword,
-          recoveryToken: null,
-        });
-
-        return this.sendChangedPassword(+userId);
-      },
-    );
-
-    return response;
+      return this.sendChangedPassword(+userId!);
+    } catch (error) {
+      throw new InvalidTokenException();
+    }
   }
 }
