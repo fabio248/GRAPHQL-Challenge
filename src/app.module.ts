@@ -24,6 +24,7 @@ import { MailerModule } from './mailer/mailer.module';
       playground: false,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      introspection: true,
     }),
     ConfigModule.forRoot({
       isGlobal: true,
