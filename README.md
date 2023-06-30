@@ -18,6 +18,9 @@ create `.env file` with enviroment variable (more details `.env.example`).
 #create database with docker
 $ npm run docker:up
 
+#To run migrations to database
+$ npx prisma migrate dev
+
 # development
 $ npm run start
 
@@ -25,10 +28,6 @@ $ npm run start
 $ npm run start:dev
 
 ```
-
-## Documentation postman
-
-Documentation postman [here](https://documenter.getpostman.com/view/24300106/2s93sjVozH)
 
 ## Test
 
