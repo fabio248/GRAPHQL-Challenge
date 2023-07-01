@@ -13,7 +13,7 @@ export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Query(() => [CategoryEntity], {
-    name: 'listCategories',
+    name: 'getListCategories',
     description: 'get categories list',
   })
   findAll(@CurrentUser(['MANAGER']) _user: JwtPayload) {
