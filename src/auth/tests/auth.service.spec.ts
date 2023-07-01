@@ -127,7 +127,7 @@ describe('AuthService', () => {
       mockMailerService.sendMail.mockResolvedValueOnce();
       spyJwtSign.mockImplementationOnce(() => accessToken);
 
-      const actual = await service.sendRecoveryEmail(email);
+      const actual = await service.sendRecoveryEmail({ email });
 
       expect(actual).toEqual(new MailResponse(user.email));
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('AuthService', () => {
       const email = getEmail;
       mockUserService.findOneByEmail.mockResolvedValueOnce(null);
 
-      const actual = () => service.sendRecoveryEmail(email);
+      const actual = () => service.sendRecoveryEmail({ email });
 
       expect(actual).rejects.toEqual(new UserNotFoundException());
       expect(mockUserService.findOneByEmail).toHaveBeenCalledTimes(1);
